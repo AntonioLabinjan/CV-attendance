@@ -32,27 +32,47 @@
         tr:nth-child(even) {
             background-color: #f2f2f2;
         }
+        h2 {
+            margin-top: 20px;
+        }
+        .download-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .download-button:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
     <h1>Attendance Records</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Date</th>
-                <th>Time</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for record in records %}
+    <a href="{{ url_for('download_attendance') }}">
+        <button class="download-button">Download CSV</button>
+    </a>
+    {% for date, records in grouped_records.items() %}
+        <h2>{{ date }}</h2>
+        <table>
+            <thead>
                 <tr>
-                    <td>{{ record[0] }}</td>
-                    <td>{{ record[1] }}</td>
-                    <td>{{ record[2] }}</td>
+                    <th>Name</th>
+                    <th>Time</th>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                {% for name, time in records %}
+                    <tr>
+                        <td>{{ name }}</td>
+                        <td>{{ time }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endfor %}
 </body>
 </html>
