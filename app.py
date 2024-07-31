@@ -1,7 +1,9 @@
 import os
 import cv2
 import numpy as np
-from flask import Flask, Response, render_template
+from flask import Flask, Response, render_template, send_file
+import csv 
+import io
 from transformers import CLIPProcessor, CLIPModel
 import torch
 import sqlite3
@@ -63,23 +65,36 @@ def create_db():
     conn = sqlite3.connect('attendance.db')
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS attendance
-                 (name TEXT, date TEXT, time TEXT)''')
+                 (name TEXT, date TEXT, time TEXT, UNIQUE(name, date))''')
     conn.commit()
     conn.close()
 
+create_db()
+
+
 def log_attendance(name):
-    # Check if the name has already been logged in this session
-    if name in logged_names:
-        return
-    conn = sqlite3.connect('attendance.db')
-    c = conn.cursor()
     now = datetime.now()
     date = now.strftime("%Y-%m-%d")
     time = now.strftime("%H:%M:%S")
+
+    conn = sqlite3.connect('attendance.db')
+    c = conn.cursor()
+
+    # Check if attendance for the student on the current date already exists
+    c.execute("SELECT * FROM attendance WHERE name = ? AND date = ?", (name, date))
+    existing_entry = c.fetchone()
+    
+    if existing_entry:
+        print(f"Attendance for {name} on {date} is already logged.")
+        return  # If an entry exists, do nothing
+
+    # If no existing entry, insert the new attendance record
     c.execute("INSERT INTO attendance (name, date, time) VALUES (?, ?, ?)", (name, date, time))
     conn.commit()
     conn.close()
-    logged_names.add(name)  # Mark this name as logged for the session
+
+    print(f"Logged attendance for {name} on {date} at {time}.")
+
 
 create_db()
 
@@ -133,10 +148,42 @@ def index():
 def attendance():
     conn = sqlite3.connect('attendance.db')
     c = conn.cursor()
-    c.execute("SELECT name, date, time FROM attendance")
+    c.execute("SELECT name, date, time FROM attendance ORDER BY date, time")
     records = c.fetchall()
     conn.close()
-    return render_template('attendance.html', records=records)
+
+    # Group records by date
+    grouped_records = {}
+    for name, date, time in records:
+        if date not in grouped_records:
+            grouped_records[date] = []
+        grouped_records[date].append((name, time))
+    
+    return render_template('attendance.html', grouped_records=grouped_records)
+
+@app.route('/download')
+def download_attendance():
+    conn = sqlite3.connect('attendance.db')
+    c = conn.cursor()
+    c.execute("SELECT name, date, time FROM attendance ORDER BY date, time")
+    records = c.fetchall()
+    conn.close()
+
+    # Create a string buffer to write CSV data
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Write CSV headers
+    writer.writerow(['Name', 'Date', 'Time'])
+    
+    # Write CSV data
+    for record in records:
+        writer.writerow(record)
+    
+    # Seek to the beginning of the stream
+    output.seek(0)
+    
+    return Response(output, mimetype="text/csv", headers={"Content-Disposition":"attachment;filename=attendance.csv"})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5144)
