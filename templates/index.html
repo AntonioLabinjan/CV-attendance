@@ -1,47 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Face Recognition Attendance System</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-        }
-        h1 {
-            margin-bottom: 20px;
-        }
-        img {
-            border: 2px solid #000;
-        }
-        button, .link-button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 16px;
-            color: #fff;
-            background-color: #4CAF50;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            text-decoration: none;
-            text-align: center;
-        }
-        button:hover, .link-button:hover {
-            background-color: #45a049;
-        }
-    </style>
+    <title>Home</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>Face Recognition Attendance System</h1>
-    <img src="{{ url_for('video_feed') }}" width="640" height="480">
-    <a href="{{ url_for('attendance') }}" class="link-button">View Attendance Records</a>
-    <a href="{{ url_for('add_student') }}" class="link-button">Add New Student</a>
+    <header>
+        <h1>Welcome to CV Attendance System</h1>
+    </header>
+    <div class="container">
+        <h2>Home</h2>
+        <p>Use the buttons below to navigate to different sections of the application.</p>
+        <a href="/video_feed" class="btn">Video Feed</a>
+        <a href="/add_student" class="btn">Add Student</a>
+        <a href="/attendance" class="btn">View Attendance</a>
+        <a href="/set_subject" class="btn">Set Subject</a>
+    </div>
+    <footer>
+        <p>&copy; 2024 CV Attendance System</p>
+    </footer>
 </body>
 </html>
