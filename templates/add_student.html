@@ -1,52 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add New Student</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-        }
-        form {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        input, button {
-            margin: 10px 0;
-            padding: 10px;
-            font-size: 16px;
-        }
-        button {
-            color: #fff;
-            background-color: #4CAF50;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-    </style>
+    <title>Add Student</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>Add New Student</h1>
-    <form action="{{ url_for('add_student') }}" method="post" enctype="multipart/form-data">
-        <input type="text" name="name" placeholder="Student Name" required>
-        <input type="file" name="images" multiple accept="image/*" required>
-        <button type="submit">Add Student</button>
-    </form>
+    <header>
+        <h1>Add Student</h1>
+    </header>
+    <div class="container">
+        <form method="POST" enctype="multipart/form-data">
+            <label for="name">Student Name:</label>
+            <input type="text" id="name" name="name" required>
+            <label for="images">Upload Images:</label>
+            <input type="file" id="images" name="images" multiple required>
+            <button type="submit">Add Student</button>
+        </form>
+        <a href="/" class="btn">Back to Home</a>
+        <a href="/video_feed" class="btn">Video Feed</a>
+        <a href="/attendance" class="btn">View Attendance</a>
+        <a href="/set_subject" class="btn">Set Subject</a>
+    </div>
+    <footer>
+        <p>&copy; 2024 CV Attendance System</p>
+    </footer>
 </body>
 </html>
