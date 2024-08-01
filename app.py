@@ -1,7 +1,7 @@
 import os
 import cv2
 import numpy as np
-from flask import Flask, Response, render_template, send_file
+from flask import Flask, Response, render_template, send_file, request
 import csv 
 import io
 from transformers import CLIPProcessor, CLIPModel
@@ -71,6 +71,30 @@ def create_db():
 
 create_db()
 
+@app.route('/add_student', methods=['GET', 'POST'])
+def add_student():
+    if request.method == 'POST':
+        name = request.form['name']
+        images = request.files.getlist('images')
+        
+        # Create a new subfolder in the known_faces directory
+        student_dir = os.path.join('known_faces', name)
+        os.makedirs(student_dir, exist_ok=True)
+
+        for image in images:
+            # Save each uploaded image in the new student's subfolder
+            image_path = os.path.join(student_dir, image.filename)
+            image.save(image_path)
+            add_known_face(image_path, name)
+        
+        return render_template('add_student_success.html', name=name)
+
+    return render_template('add_student.html')
+
+# Add student success route
+@app.route('/add_student_success')
+def add_student_success():
+    return render_template('add_student_success.html')
 
 def log_attendance(name):
     now = datetime.now()
