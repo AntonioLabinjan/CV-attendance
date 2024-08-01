@@ -64,12 +64,23 @@ app = Flask(__name__)
 def create_db():
     conn = sqlite3.connect('attendance.db')
     c = conn.cursor()
+    c.execute('''DROP TABLE attendance''')
     c.execute('''CREATE TABLE IF NOT EXISTS attendance
-                 (name TEXT, date TEXT, time TEXT, UNIQUE(name, date))''')
+                 (name TEXT, date TEXT, time TEXT, subject TEXT, UNIQUE(name, date, subject))''')
     conn.commit()
     conn.close()
 
 create_db()
+
+current_subject = None  # Initialize current subject
+
+@app.route('/set_subject', methods=['GET', 'POST'])
+def set_subject():
+    global current_subject
+    if request.method == 'POST':
+        current_subject = request.form['subject']
+        return render_template('set_subject_success.html', subject=current_subject)
+    return render_template('set_subject.html')
 
 @app.route('/add_student', methods=['GET', 'POST'])
 def add_student():
@@ -97,6 +108,11 @@ def add_student_success():
     return render_template('add_student_success.html')
 
 def log_attendance(name):
+    global current_subject
+    if current_subject is None:
+        print("No subject set. Attendance not logged.")
+        return
+
     now = datetime.now()
     date = now.strftime("%Y-%m-%d")
     time = now.strftime("%H:%M:%S")
@@ -104,20 +120,21 @@ def log_attendance(name):
     conn = sqlite3.connect('attendance.db')
     c = conn.cursor()
 
-    # Check if attendance for the student on the current date already exists
-    c.execute("SELECT * FROM attendance WHERE name = ? AND date = ?", (name, date))
+    # Check if attendance for the student on the current date and subject already exists
+    c.execute("SELECT * FROM attendance WHERE name = ? AND date = ? AND subject = ?", (name, date, current_subject))
     existing_entry = c.fetchone()
     
     if existing_entry:
-        print(f"Attendance for {name} on {date} is already logged.")
+        print(f"Attendance for {name} on {date} for subject {current_subject} is already logged.")
         return  # If an entry exists, do nothing
 
     # If no existing entry, insert the new attendance record
-    c.execute("INSERT INTO attendance (name, date, time) VALUES (?, ?, ?)", (name, date, time))
+    c.execute("INSERT INTO attendance (name, date, time, subject) VALUES (?, ?, ?, ?)", (name, date, time, current_subject))
     conn.commit()
     conn.close()
 
-    print(f"Logged attendance for {name} on {date} at {time}.")
+    print(f"Logged attendance for {name} on {date} at {time} for subject {current_subject}.")
+
 
 
 create_db()
@@ -172,24 +189,27 @@ def index():
 def attendance():
     conn = sqlite3.connect('attendance.db')
     c = conn.cursor()
-    c.execute("SELECT name, date, time FROM attendance ORDER BY date, time")
+    c.execute("SELECT name, date, time, subject FROM attendance ORDER BY date, time")
     records = c.fetchall()
     conn.close()
 
-    # Group records by date
+    # Group records by date and subject
     grouped_records = {}
-    for name, date, time in records:
+    for name, date, time, subject in records:
         if date not in grouped_records:
-            grouped_records[date] = []
-        grouped_records[date].append((name, time))
+            grouped_records[date] = {}
+        if subject not in grouped_records[date]:
+            grouped_records[date][subject] = []
+        grouped_records[date][subject].append((name, time))
     
     return render_template('attendance.html', grouped_records=grouped_records)
+
 
 @app.route('/download')
 def download_attendance():
     conn = sqlite3.connect('attendance.db')
     c = conn.cursor()
-    c.execute("SELECT name, date, time FROM attendance ORDER BY date, time")
+    c.execute("SELECT subject, name, date, time FROM attendance ORDER BY subject, date, time")
     records = c.fetchall()
     conn.close()
 
@@ -197,17 +217,29 @@ def download_attendance():
     output = io.StringIO()
     writer = csv.writer(output)
     
+    # Initialize previous subject to keep track of subject changes
+    previous_subject = None
+
     # Write CSV headers
-    writer.writerow(['Name', 'Date', 'Time'])
-    
-    # Write CSV data
+    writer.writerow(['Subject', 'Name', 'Date', 'Time'])
+
+    # Write CSV data grouped by subject
     for record in records:
-        writer.writerow(record)
+        subject, name, date, time = record
+        
+        if subject != previous_subject:
+            if previous_subject is not None:
+                writer.writerow([])  # Add an empty row for separation between subjects
+            writer.writerow([subject])  # Write the subject name as a new section header
+            previous_subject = subject
+        
+        writer.writerow(['', name, date, time])
     
     # Seek to the beginning of the stream
     output.seek(0)
     
-    return Response(output, mimetype="text/csv", headers={"Content-Disposition":"attachment;filename=attendance.csv"})
+    return Response(output, mimetype="text/csv", headers={"Content-Disposition": "attachment;filename=attendance.csv"})
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5144)
