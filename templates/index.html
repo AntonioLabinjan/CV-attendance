@@ -21,7 +21,7 @@
         img {
             border: 2px solid #000;
         }
-        button {
+        button, .link-button {
             margin-top: 20px;
             padding: 10px 20px;
             font-size: 16px;
@@ -30,8 +30,10 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            text-decoration: none;
+            text-align: center;
         }
-        button:hover {
+        button:hover, .link-button:hover {
             background-color: #45a049;
         }
     </style>
@@ -39,8 +41,7 @@
 <body>
     <h1>Face Recognition Attendance System</h1>
     <img src="{{ url_for('video_feed') }}" width="640" height="480">
-    <a href="{{ url_for('attendance') }}">
-        <button>View Attendance Records</button>
-    </a>
+    <a href="{{ url_for('attendance') }}" class="link-button">View Attendance Records</a>
+    <a href="{{ url_for('add_student') }}" class="link-button">Add New Student</a>
 </body>
 </html>
