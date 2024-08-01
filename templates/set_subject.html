@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Set Subject</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Set Current Subject</h1>
+    </header>
+    <div class="container">
+        <form method="POST">
+            <label for="subject">Subject:</label>
+            <input type="text" id="subject" name="subject" required>
+            <button type="submit">Set Subject</button>
+        </form>
+        <a href="/" class="btn">Back to Home</a>
+        <a href="/add_student" class="btn">Add Student</a>
+        <a href="/attendance" class="btn">View Attendance</a>
+        <a href="/video_feed" class="btn">Video Feed</a>
+    </div>
+    <footer>
+        <p>&copy; 2024 CV Attendance System</p>
+    </footer>
+</body>
+</html>
