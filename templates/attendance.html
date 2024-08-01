@@ -1,78 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance Records</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-        }
-        table {
-            width: 80%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #4CAF50;
-            color: white;
-        }
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-        h2 {
-            margin-top: 20px;
-        }
-        .download-button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 16px;
-            color: #fff;
-            background-color: #4CAF50;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .download-button:hover {
-            background-color: #45a049;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>Attendance Records</h1>
-    <a href="{{ url_for('download_attendance') }}">
-        <button class="download-button">Download CSV</button>
-    </a>
-    {% for date, records in grouped_records.items() %}
-        <h2>{{ date }}</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Time</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for name, time in records %}
-                    <tr>
-                        <td>{{ name }}</td>
-                        <td>{{ time }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% endfor %}
+    <header>
+        <h1>Attendance Records</h1>
+    </header>
+    <div class="container table-container">
+        <h2>Attendance Details</h2>
+        {% for date, subjects in grouped_records.items() %}
+            <h3>Date: {{ date }}</h3>
+            {% for subject, records in subjects.items() %}
+                <h4>Subject: {{ subject }}</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for name, time in records %}
+                            <tr>
+                                <td>{{ name }}</td>
+                                <td>{{ time }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endfor %}
+        {% endfor %}
+        <a href="/" class="btn">Back to Home</a>
+        <a href="/add_student" class="btn">Add Student</a>
+        <a href="/video_feed" class="btn">Video Feed</a>
+        <a href="/set_subject" class="btn">Set Subject</a>
+        <a href="/download" class="btn">Download attendance CSV</a>
+    </div>
+    <footer>
+        <p>&copy; 2024 CV Attendance System</p>
+    </footer>
 </body>
 </html>
