@@ -249,6 +249,19 @@ def delete_attendance(id):
     conn.close()
     return redirect(url_for('attendance'))
 
+@app.route('/statistics')
+def statistics():
+    conn = sqlite3.connect('attendance.db')
+    c = conn.cursor()
+
+    c.execute("SELECT name, subject, COUNT(*) FROM attendance GROUP BY name, subject")
+    student_attendance = c.fetchall()
+
+    c.execute("SELECT subject, COUNT(*) FROM attendance GROUP BY subject")
+    subject_attendance = c.fetchall()
+
+    conn.close()
+    return render_template('statistics.html', student_attendance=student_attendance, subject_attendance=subject_attendance)
 
 
 if __name__ == "__main__":
