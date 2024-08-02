@@ -132,3 +132,17 @@ footer {
 .btn:hover {
     background-color: #0056b3;
 }
+
+
+.btn-delete {
+    background-color: #dc3545;
+    border: none;
+    cursor: pointer;
+    padding: 5px 10px;
+    font-size: 14px;
+    border-radius: 3px;
+}
+
+.btn-delete:hover {
+    background-color: #c82333;
+}
