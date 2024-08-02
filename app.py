@@ -1,7 +1,7 @@
 import os
 import cv2
 import numpy as np
-from flask import Flask, Response, render_template, send_file, request
+from flask import Flask, Response, render_template, send_file, request, redirect, url_for
 import csv 
 import io
 from transformers import CLIPProcessor, CLIPModel
@@ -189,18 +189,18 @@ def index():
 def attendance():
     conn = sqlite3.connect('attendance.db')
     c = conn.cursor()
-    c.execute("SELECT name, date, time, subject FROM attendance ORDER BY date, time")
+    c.execute("SELECT rowid, subject, name, date, time FROM attendance ORDER BY date, time")
     records = c.fetchall()
     conn.close()
 
     # Group records by date and subject
     grouped_records = {}
-    for name, date, time, subject in records:
+    for rowid, subject, name, date, time in records:
         if date not in grouped_records:
             grouped_records[date] = {}
         if subject not in grouped_records[date]:
             grouped_records[date][subject] = []
-        grouped_records[date][subject].append((name, time))
+        grouped_records[date][subject].append((rowid, name, time))
     
     return render_template('attendance.html', grouped_records=grouped_records)
 
@@ -239,6 +239,16 @@ def download_attendance():
     output.seek(0)
     
     return Response(output, mimetype="text/csv", headers={"Content-Disposition": "attachment;filename=attendance.csv"})
+
+@app.route('/delete_attendance/<int:id>', methods=['POST'])
+def delete_attendance(id):
+    conn = sqlite3.connect('attendance.db')
+    c = conn.cursor()
+    c.execute("DELETE FROM attendance WHERE rowid = ?", (id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('attendance'))
+
 
 
 if __name__ == "__main__":
