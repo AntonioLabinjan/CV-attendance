@@ -19,13 +19,19 @@
                         <tr>
                             <th>Name</th>
                             <th>Time</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for name, time in records %}
+                        {% for rowid, name, time in records %}
                             <tr>
                                 <td>{{ name }}</td>
                                 <td>{{ time }}</td>
+                                <td>
+                                    <form method="POST" action="{{ url_for('delete_attendance', id=rowid) }}" style="display:inline;">
+                                        <button type="submit" class="btn-delete">Delete</button>
+                                    </form>
+                                </td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -36,7 +42,11 @@
         <a href="/add_student" class="btn">Add Student</a>
         <a href="/video_feed" class="btn">Video Feed</a>
         <a href="/set_subject" class="btn">Set Subject</a>
-        <a href="/download" class="btn">Download attendance CSV</a>
+    </div>
+    <div>
+        <br>
+        <br>
+        <br>
     </div>
     <footer>
         <p>&copy; 2024 CV Attendance System</p>
