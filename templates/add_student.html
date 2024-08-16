@@ -1,25 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Student</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <header>
-        <h1>Add Student</h1>
-    </header>
     <div class="container">
-        <form method="POST" enctype="multipart/form-data">
+        <h2>Add a New Student</h2>
+        <form action="{{ url_for('add_student') }}" method="post" enctype="multipart/form-data">
             <label for="name">Student Name:</label>
             <input type="text" id="name" name="name" required>
+            
             <label for="images">Upload Images:</label>
             <input type="file" id="images" name="images" multiple required>
+
+            <label for="subjects">Select Subjects:</label>
+            <select id="subjects" name="subjects" multiple required>
+                {% for subject in available_subjects %}
+                <option value="{{ subject }}">{{ subject }}</option>
+                {% endfor %}
+            </select>
+
             <button type="submit">Add Student</button>
         </form>
+
+        {% if name %}
+        <div class="success-message">
+            <p>Student {{ name }} has been successfully added and registered for the subject {{ subject }}.</p>
+        </div>
+        {% endif %}
+    </div>
         <a href="/" class="btn">Back to Home</a>
         <a href="/video_feed" class="btn">Video Feed</a>
         <a href="/attendance" class="btn">View Attendance</a>
         <a href="/set_subject" class="btn">Set Subject</a>
+        <a href="/statistics" class="btn">View Statistics</a>
     </div>
     <footer>
         <p>&copy; 2024 CV Attendance System</p>
