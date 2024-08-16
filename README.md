@@ -47,8 +47,11 @@ source venv/bin/activate  # On Windows use `venv\Scripts\activate`
 3. **Install dependecies**
 pip install -r requirements.txt
 
-4. **Set up database**
+
+### DODAT RASPORED SATI KOJI SAM DEFINIRA PREDMETE KOJI SE LOG-aju. UBACIT KAŠNJENJE I NAPRAVIT DA SE PRISUTNOST ZA SVAKI PREDMET MORE PRIJAVIT SAMO U ODREĐENEMU INTERVALU (AKO SMO VAN INTERVALA, KASNIMO)
+
+5. **Set up database**
 The database will be automatically created on the first run. Ensure attendance.db is writable by the application.
 
-5. **Prepare known faces**
+6. **Prepare known faces**
 Place student images in the known_faces directory, organized by student folders.
