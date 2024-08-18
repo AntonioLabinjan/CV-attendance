@@ -288,7 +288,320 @@ def generate_frames():
             face_embedding /= np.linalg.norm(face_embedding)  # Normalize the embedding
 
             if len(known_face_encodings) == 0:
+                name = "Unknown"import os
+import cv2
+import numpy as np
+from flask import Flask, Response, render_template, send_file, request, redirect, url_for, flash
+import csv 
+import io
+from transformers import CLIPProcessor, CLIPModel
+import torch
+import sqlite3
+from datetime import datetime
+
+# Initialize CLIP model and processor
+model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
+processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+
+# In-memory storage for known face embeddings and their labels
+known_face_encodings = []
+known_face_names = []
+
+# Track attendance for the current session
+logged_names = set()
+
+# Function to add a known face
+def add_known_face(image_path, name):
+    image = cv2.imread(image_path)
+    if image is None:
+        raise ValueError(f"Image at path {image_path} not found.")
+    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    inputs = processor(images=image_rgb, return_tensors="pt")
+    with torch.no_grad():
+        outputs = model.get_image_features(**inputs)
+    embedding = outputs.cpu().numpy().flatten()
+    known_face_encodings.append(embedding / np.linalg.norm(embedding))  # Normalize the embedding
+    known_face_names.append(name)
+    print(f"Added face for {name} from {image_path}")
+
+# Load all known faces from the 'known_faces' directory
+def load_known_faces():
+    for student_name in os.listdir('known_faces'):
+        student_dir = os.path.join('known_faces', student_name)
+        if os.path.isdir(student_dir):
+            for filename in os.listdir(student_dir):
+                image_path = os.path.join(student_dir, filename)
+                try:
+                    add_known_face(image_path, student_name)
+                except ValueError as e:
+                    print(e)
+
+    # Debugging output
+    print(f"Loaded {len(known_face_encodings)} known face encodings")
+    print(f"Known face names: {known_face_names}")
+
+# Load known faces at startup
+load_known_faces()
+
+# Initialize the webcam
+video_capture = cv2.VideoCapture(0)
+
+# Face detection using Haar Cascade
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+
+app = Flask(__name__)
+
+def create_db():
+    conn = sqlite3.connect('attendance.db')
+    c = conn.cursor()
+    c.execute('''DROP TABLE IF EXISTS attendance''')
+    c.execute('''CREATE TABLE IF NOT EXISTS attendance
+                 (name TEXT, date TEXT, time TEXT, subject TEXT, late BOOLEAN DEFAULT 0, UNIQUE(name, date, subject))''')
+    conn.commit()
+    conn.close()
+
+create_db()
+
+
+import sqlite3
+
+
+from datetime import datetime
+
+# Initialize current subject details
+current_subject = None
+attendance_date = None
+start_time = None
+end_time = None
+
+@app.route('/set_subject', methods=['GET', 'POST'])
+def set_subject():
+    global current_subject, attendance_date, start_time, end_time
+    if request.method == 'POST':
+        current_subject = request.form['subject']
+        attendance_date = request.form['date']
+        start_time = request.form['start_time']
+        end_time = request.form['end_time']
+        return render_template('set_subject_success.html', 
+                               subject=current_subject, 
+                               date=attendance_date, 
+                               start_time=start_time, 
+                               end_time=end_time)
+    return render_template('set_subject.html')
+
+def is_within_time_interval():
+    now = datetime.now()
+    current_time = now.strftime("%H:%M")
+    current_date = now.strftime("%Y-%m-%d")
+    return (current_date == attendance_date and 
+            start_time <= current_time <= end_time)
+
+@app.route('/add_student', methods=['GET', 'POST'])
+def add_student():
+    if request.method == 'POST':
+        name = request.form['name']
+        images = request.files.getlist('images')
+        
+        # Create a new subfolder in the known_faces directory
+        student_dir = os.path.join('known_faces', name)
+        os.makedirs(student_dir, exist_ok=True)
+
+        for image in images:
+            # Save each uploaded image in the new student's subfolder
+            image_path = os.path.join(student_dir, image.filename)
+            image.save(image_path)
+            add_known_face(image_path, name)
+        
+        return render_template('add_student_success.html', name=name)
+
+    return render_template('add_student.html')
+
+# Add student success route
+@app.route('/add_student_success')
+def add_student_success():
+    return render_template('add_student_success.html')
+
+from datetime import datetime, timedelta
+import cv2
+
+def log_attendance(name, frame):
+    global current_subject, attendance_date, start_time, end_time
+    if current_subject is None or not is_within_time_interval():
+        print("Subject is not set or current time is outside of allowed interval. Attendance not logged.")
+        return frame
+
+    now = datetime.now()
+    date = now.strftime("%Y-%m-%d")
+    time = now.strftime("%H:%M:%S")
+
+    # Create datetime object for start time
+    start_time_obj = datetime.strptime(f"{attendance_date} {start_time}", "%Y-%m-%d %H:%M")
+
+    # Calculate the late threshold time
+    late_time_obj = start_time_obj + timedelta(minutes=14)
+
+    # Check if the current time is late
+    if now > late_time_obj:
+        cv2.putText(frame, f"Late Entry: {name}", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+
+    conn = sqlite3.connect('attendance.db')
+    c = conn.cursor()
+
+    c.execute("SELECT * FROM attendance WHERE name = ? AND date = ? AND subject = ?", (name, date, current_subject))
+    existing_entry = c.fetchone()
+
+    if existing_entry:
+        print(f"Attendance for {name} on {date} for subject {current_subject} is already logged.")
+        return frame
+
+    # Insert the new attendance record
+    c.execute("INSERT INTO attendance (name, date, time, subject, late) VALUES (?, ?, ?, ?, ?)", 
+              (name, date, time, current_subject, 1 if now > late_time_obj else 0))
+    conn.commit()
+    conn.close()
+
+    print(f"Logged attendance for {name} on {date} at {time} for subject {current_subject}.")
+
+    return frame
+
+
+
+
+
+
+
+create_db()
+
+
+
+def generate_frames():
+    while True:
+        ret, frame = video_capture.read()
+        if not ret:
+            break
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+
+        for (x, y, w, h) in faces:
+            face_image = frame[y:y+h, x:x+w]
+            face_image_rgb = cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB)
+            inputs = processor(images=face_image_rgb, return_tensors="pt")
+            with torch.no_grad():
+                outputs = model.get_image_features(**inputs)
+            face_embedding = outputs.cpu().numpy().flatten()
+            face_embedding /= np.linalg.norm(face_embedding)  # Normalize the embedding
+
+            if len(known_face_encodings) == 0:
                 name = "Unknown"
+                print("No known face encodings available.")
+            else:
+                # Find the best match for the detected face
+                distances = np.linalg.norm(known_face_encodings - face_embedding, axis=1)
+                min_distance_index = np.argmin(distances)
+                name = "Unknown"
+                if distances[min_distance_index] < 0.6:  # Adjusted threshold
+                    name = known_face_names[min_distance_index]
+                    frame = log_attendance(name, frame)  # Log attendance with overlay if late
+
+            # Draw a rectangle around the face and label it
+            cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
+            cv2.putText(frame, name, (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
+
+        ret, buffer = cv2.imencode('.jpg', frame)
+        frame = buffer.tobytes()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+
+@app.route('/video_feed')
+def video_feed():
+    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/attendance')
+def attendance():
+    conn = sqlite3.connect('attendance.db')
+    c = conn.cursor()
+    c.execute("SELECT rowid, subject, name, date, time, late FROM attendance ORDER BY date, time")
+    records = c.fetchall()
+    conn.close()
+
+    # Group records by date and subject
+    grouped_records = {}
+    for rowid, subject, name, date, time, late in records:
+        if date not in grouped_records:
+            grouped_records[date] = {}
+        if subject not in grouped_records[date]:
+            grouped_records[date][subject] = []
+        grouped_records[date][subject].append((rowid, name, time, late))
+    
+    return render_template('attendance.html', grouped_records=grouped_records)
+
+
+@app.route('/download')
+def download_attendance():
+    conn = sqlite3.connect('attendance.db')
+    c = conn.cursor()
+    c.execute("SELECT subject, name, date, time FROM attendance ORDER BY subject, date, time")
+    records = c.fetchall()
+    conn.close()
+
+    # Create a string buffer to write CSV data
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Initialize previous subject to keep track of subject changes
+    previous_subject = None
+
+    # Write CSV headers
+    writer.writerow(['Subject', 'Name', 'Date', 'Time'])
+
+    # Write CSV data grouped by subject
+    for record in records:
+        subject, name, date, time = record
+        
+        if subject != previous_subject:
+            if previous_subject is not None:
+                writer.writerow([])  # Add an empty row for separation between subjects
+            writer.writerow([subject])  # Write the subject name as a new section header
+            previous_subject = subject
+        
+        writer.writerow(['', name, date, time])
+    
+    # Seek to the beginning of the stream
+    output.seek(0)
+    
+    return Response(output, mimetype="text/csv", headers={"Content-Disposition": "attachment;filename=attendance.csv"})
+
+@app.route('/delete_attendance/<int:id>', methods=['POST'])
+def delete_attendance(id):
+    conn = sqlite3.connect('attendance.db')
+    c = conn.cursor()
+    c.execute("DELETE FROM attendance WHERE rowid = ?", (id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('attendance'))
+
+@app.route('/statistics')
+def statistics():
+    conn = sqlite3.connect('attendance.db')
+    c = conn.cursor()
+
+    c.execute("SELECT name, subject, COUNT(*) FROM attendance GROUP BY name, subject")
+    student_attendance = c.fetchall()
+
+    c.execute("SELECT subject, COUNT(*) FROM attendance GROUP BY subject")
+    subject_attendance = c.fetchall()
+
+    conn.close()
+    return render_template('statistics.html', student_attendance=student_attendance, subject_attendance=subject_attendance)
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5144)
                 print("No known face encodings available.")
             else:
                 # Find the best match for the detected face
