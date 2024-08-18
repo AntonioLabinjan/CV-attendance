@@ -1,0 +1,23 @@
+{% extends 'layout.html' %}
+{% block content %}
+<h1>Attendance Records</h1>
+{% for date, subjects in grouped_records.items() %}
+    <h2>Date: {{ date }}</h2>
+    {% for subject, records in subjects.items() %}
+        <h3>Subject: {{ subject }}</h3>
+        <ul>
+            {% for rowid, name, time, late in records %}
+                <li>{{ name }} - {{ time }} 
+                    {% if late %}
+                        <span style="color: red;">(Late)</span>
+                    {% endif %}
+                    <form action="{{ url_for('delete_attendance', id=rowid) }}" method="post" style="display:inline;">
+                        <button type="submit">Delete</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endfor %}
+{% endfor %}
+<a href="{{ url_for('download_attendance') }}">Download Attendance CSV</a>
+{% endblock %}

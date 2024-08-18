@@ -1,0 +1,11 @@
+{% extends 'layout.html' %}
+{% block content %}
+<h1>Add a New Student</h1>
+<form method="post" action="{{ url_for('add_student') }}" enctype="multipart/form-data">
+    <label for="name">Student Name:</label>
+    <input type="text" id="name" name="name" required>
+    <label for="images">Upload Images:</label>
+    <input type="file" id="images" name="images" multiple required>
+    <button type="submit">Add Student</button>
+</form>
+{% endblock %}
