@@ -54,6 +54,4 @@ The database will be automatically created on the first run. Ensure attendance.d
 Place student images in the known_faces directory, organized by student folders.
 
 
-### DODAT RASPORED SATI KOJI SAM DEFINIRA PREDMETE KOJI SE LOG-aju. 
-### UBACIT KAŠNJENJE I NAPRAVIT DA SE PRISUTNOST ZA SVAKI PREDMET MORE PRIJAVIT SAMO U ODREĐENEMU INTERVALU (AKO SMO VAN INTERVALA, KASNIMO)
 ### GRAFIKONI I VIZUALIZACIJA PODATAKA
