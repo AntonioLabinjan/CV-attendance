@@ -1,4 +1,4 @@
-### GRAFIKONI I VIZUALIZACIJA PODATAKA(još to dodat i gotovo)
+### GRAFIKONI I VIZUALIZACIJA PODATAKA + auth(još to dodat i  forši gotovo)
 
 # Face Recognition Attendance System
 
