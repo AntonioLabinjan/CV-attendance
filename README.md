@@ -1,3 +1,5 @@
+### GRAFIKONI I VIZUALIZACIJA PODATAKA(još to dodat i gotovo)
+
 # Face Recognition Attendance System
 
 ![Face Recognition Attendance System](https://img.shields.io/badge/Face_Recognition_Attendance_System-v1.0-brightgreen)
@@ -54,4 +56,4 @@ The database will be automatically created on the first run. Ensure attendance.d
 Place student images in the known_faces directory, organized by student folders.
 
 
-### GRAFIKONI I VIZUALIZACIJA PODATAKA
+
