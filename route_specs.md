@@ -141,3 +141,79 @@
 - **Route Usage**: This route retrieves a list of unique student names from the database, sorted alphabetically, and displays them on the `students.html` page.
 
 ---
+
+
+### Specification for `/plot/student_attendance` Route
+
+- **Supported Methods**: `GET`
+- **Functions Used**:
+  - `sqlite3.connect()`: Connects to the SQLite database `attendance.db`.
+  - `c.execute()`: Executes a SQL query to retrieve the count of attendances per student from the database.
+  - `c.fetchall()`: Fetches all the resulting records from the executed query.
+  - `conn.close()`: Closes the database connection after fetching the records.
+  - `plt.figure()`: Creates a new figure for the plot.
+  - `sns.barplot()`: Creates a bar plot using Seaborn, displaying the count of attendances for each student.
+  - `plt.title()`, `plt.xlabel()`, `plt.ylabel()`: Set the title and axis labels for the plot.
+  - `io.BytesIO()`: Creates an in-memory byte stream to hold the plot image.
+  - `plt.savefig()`: Saves the plot image to the byte stream.
+  - `img.seek(0)`: Resets the byte stream’s position to the beginning before sending the response.
+  - `plt.close()`: Closes the plot to free up resources.
+  - `send_file()`: Sends the plot image as a response with MIME type `image/png`.
+- **Templates Rendered**: None (this route directly returns a plot image).
+- **Route Usage**: This route generates and serves a bar plot showing the number of attendances per student.
+
+---
+
+### Specification for `/plot/subject_attendance` Route
+
+- **Supported Methods**: `GET`
+- **Functions Used**:
+  - `sqlite3.connect()`: Connects to the SQLite database `attendance.db`.
+  - `c.execute()`: Executes a SQL query to retrieve the count of attendances per subject from the database.
+  - `c.fetchall()`: Fetches all the resulting records from the executed query.
+  - `conn.close()`: Closes the database connection after fetching the records.
+  - `plt.figure()`: Creates a new figure for the plot.
+  - `plt.pie()`: Creates a pie chart using Matplotlib, displaying the proportion of attendances for each subject.
+  - `plt.title()`: Sets the title of the pie chart.
+  - `io.BytesIO()`: Creates an in-memory byte stream to hold the plot image.
+  - `plt.savefig()`: Saves the plot image to the byte stream.
+  - `img.seek(0)`: Resets the byte stream’s position to the beginning before sending the response.
+  - `plt.close()`: Closes the plot to free up resources.
+  - `send_file()`: Sends the plot image as a response with MIME type `image/png`.
+- **Templates Rendered**: None (this route directly returns a plot image).
+- **Route Usage**: This route generates and serves a pie chart showing the distribution of attendances across different subjects.
+
+---
+
+### Specification for `/plot/monthly_attendance` Route
+
+- **Supported Methods**: `GET`
+- **Functions Used**:
+  - `sqlite3.connect()`: Connects to the SQLite database `attendance.db`.
+  - `c.execute()`: Executes a SQL query to retrieve the count of attendances per month from the database.
+  - `c.fetchall()`: Fetches all the resulting records from the executed query.
+  - `conn.close()`: Closes the database connection after fetching the records.
+  - `plt.figure()`: Creates a new figure for the plot.
+  - `plt.pie()`: Creates a pie chart using Matplotlib, displaying the proportion of attendances for each month.
+  - `plt.title()`: Sets the title of the pie chart.
+  - `io.BytesIO()`: Creates an in-memory byte stream to hold the plot image.
+  - `plt.savefig()`: Saves the plot image to the byte stream.
+  - `img.seek(0)`: Resets the byte stream’s position to the beginning before sending the response.
+  - `plt.close()`: Closes the plot to free up resources.
+  - `send_file()`: Sends the plot image as a response with MIME type `image/png`.
+- **Templates Rendered**: None (this route directly returns a plot image).
+- **Route Usage**: This route generates and serves a pie chart showing the distribution of attendances across different months.
+
+---
+
+### Specification for `/plots` Route
+
+- **Supported Methods**: `GET`
+- **Functions Used**:
+  - `render_template()`: Renders the HTML template `plot_router.html`.
+- **Templates Rendered**:
+  - `plot_router.html`: Provides links to the different plot routes available.
+- **Route Usage**: This route renders a page with links to the various plot routes, allowing users to view different visualizations.
+
+---
+
