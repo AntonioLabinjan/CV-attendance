@@ -1,4 +1,4 @@
-### GRAFIKONI I VIZUALIZACIJA PODATAKA + auth(još to dodat i  forši gotovo)
+### Forši napravit još neki smisleni auth system
 
 # Face Recognition Attendance System
 
