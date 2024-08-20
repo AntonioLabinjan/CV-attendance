@@ -105,7 +105,8 @@ This function is called to set up the database at the start of the application.
 def create_db():
     conn = sqlite3.connect('attendance.db')
     c = conn.cursor()
-    c.execute('''DROP TABLE IF EXISTS attendance''')
+    c.execute('''DROP TABLE IF EXISTS attendance''') 
+    #svaki put kad restartan app, dropa mi se tablica, a to ni baš efficient
     c.execute('''CREATE TABLE IF NOT EXISTS attendance
                  (name TEXT, date TEXT, time TEXT, subject TEXT, late BOOLEAN DEFAULT 0, UNIQUE(name, date, subject))''')
     conn.commit()
@@ -438,6 +439,93 @@ def students():
     conn.close()
 
     return render_template('students.html', students=students)
+
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+from flask import send_file
+import io
+
+
+@app.route('/plot/student_attendance')
+def plot_student_attendance():
+    conn = sqlite3.connect('attendance.db')
+    c = conn.cursor()
+
+    c.execute("SELECT name, COUNT(*) as count FROM attendance GROUP BY name")
+    data = c.fetchall()
+    conn.close()
+
+    # Prepare data for plotting
+    names, counts = zip(*data)
+
+    # Create the plot
+    plt.figure(figsize=(10, 6))
+    sns.barplot(x=counts, y=names, palette='viridis')
+    plt.title('Attendance by Student')
+    plt.xlabel('Number of Attendances')
+    plt.ylabel('Student')
+
+    # Save the plot to a BytesIO object and return it as a response
+    img = io.BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    plt.close()
+    return send_file(img, mimetype='image/png')
+
+@app.route('/plot/subject_attendance')
+def plot_subject_attendance():
+    conn = sqlite3.connect('attendance.db')
+    c = conn.cursor()
+
+    c.execute("SELECT subject, COUNT(*) as count FROM attendance GROUP BY subject")
+    data = c.fetchall()
+    conn.close()
+
+    # Prepare data for plotting
+    subjects, counts = zip(*data)
+
+    # Create the plot
+    plt.figure(figsize=(8, 8))
+    plt.pie(counts, labels=subjects, autopct='%1.1f%%', colors=sns.color_palette('pastel'))
+    plt.title('Attendance by Subject')
+
+    # Save the plot to a BytesIO object and return it as a response
+    img = io.BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    plt.close()
+    return send_file(img, mimetype='image/png')
+
+
+@app.route('/plot/monthly_attendance')
+def plot_monthly_attendance():
+    conn = sqlite3.connect('attendance.db')
+    c = conn.cursor()
+
+    # Adjust this query based on your actual schema. Assuming you want to group by date.
+    c.execute("SELECT date, COUNT(*) as count FROM attendance GROUP BY date")
+    data = c.fetchall()
+    conn.close()
+
+    # Prepare data for plotting
+    dates, counts = zip(*data)
+
+    # Create the plot
+    plt.figure(figsize=(8, 8))
+    plt.pie(counts, labels=dates, autopct='%1.1f%%', colors=sns.color_palette('pastel'))
+    plt.title('Monthly Attendance Distribution')
+
+    # Save the plot to a BytesIO object and return it as a response
+    img = io.BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    plt.close()
+    return send_file(img, mimetype='image/png')
+
+@app.route('/plots')
+def plots():
+    return render_template('plot_router.html')
 
 '''
 Run the flask app on port 5144
