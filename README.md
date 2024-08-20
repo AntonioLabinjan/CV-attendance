@@ -1,4 +1,4 @@
-### Forši napravit još neki smisleni auth system
+### Forši napravit još neki smisleni auth system - ideja: pohranit u DB predmete i profesore + još tablicu profesor_odrzava_predmet (više-više). Napravit login di profesor da credentialse i onda na ruti za postavljanje predmeta ima dropdown ili neki sličan menu di more postavit za prisutnost samo one predmete koje održava (njih dobije u dropdownu)
 
 # Face Recognition Attendance System
 
