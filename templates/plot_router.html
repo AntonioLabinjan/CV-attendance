@@ -3,7 +3,7 @@
 {% block head %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visualization plots</title>
+    <title>Visualization Plots</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -17,6 +17,7 @@
         }
         h1 {
             color: #333;
+            margin-bottom: 30px;
         }
         .button-container {
             display: flex;
@@ -24,6 +25,7 @@
             gap: 15px;
         }
         .route-button {
+            display: inline-block;
             padding: 15px 30px;
             font-size: 18px;
             color: #fff;
@@ -33,10 +35,15 @@
             text-align: center;
             text-decoration: none;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, transform 0.2s ease;
         }
         .route-button:hover {
             background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+        .route-button:active {
+            background-color: #004494;
+            transform: translateY(0);
         }
     </style>
 {% endblock %}
@@ -45,9 +52,11 @@
     <h1>Visualization Plots</h1>
 
     <div class="button-container">
-       <li><a href="/plot/student_attendance" class="route-button">Attendance per Student</a><br></li>
-       <li><a href="/plot/subject_attendance" class="route-button">Attendance per Subject</a><br></li>
-       <li><a href="/plot/monthly_attendance" class="route-button">Attendance per Month</a><br></li>
-        <!-- Could add more buttons for more plots -->
+       <a href="/plot/student_attendance" class="route-button">Attendance per Student</a>
+       <hr>
+       <a href="/plot/subject_attendance" class="route-button">Attendance per Subject</a>
+       <hr>
+       <a href="/plot/monthly_attendance" class="route-button">Attendance per Month</a>
+        <!-- could add more buttons for more plots -->
     </div>
 {% endblock %}
