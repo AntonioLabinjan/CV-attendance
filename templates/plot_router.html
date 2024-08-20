@@ -1,0 +1,53 @@
+{% extends 'layout.html' %}
+
+{% block head %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualization plots</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            color: #333;
+        }
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .route-button {
+            padding: 15px 30px;
+            font-size: 18px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .route-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <h1>Visualization Plots</h1>
+
+    <div class="button-container">
+       <li><a href="/plot/student_attendance" class="route-button">Attendance per Student</a><br></li>
+       <li><a href="/plot/subject_attendance" class="route-button">Attendance per Subject</a><br></li>
+       <li><a href="/plot/monthly_attendance" class="route-button">Attendance per Month</a><br></li>
+        <!-- Could add more buttons for more plots -->
+    </div>
+{% endblock %}
