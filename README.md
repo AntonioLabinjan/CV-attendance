@@ -1,5 +1,8 @@
 ### Forši napravit još neki smisleni auth system - ideja: pohranit u DB predmete i profesore + još tablicu profesor_odrzava_predmet (više-više). Napravit login di profesor da credentialse i onda na ruti za postavljanje predmeta ima dropdown ili neki sličan menu di more postavit za prisutnost samo one predmete koje održava (njih dobije u dropdownu)
 
+
+Ili lakša verzija: pustit ručno postavljanje i samo zahtijevat login za rutu. (praktički sve rute zahtijevaju login, osim one za face scan)
+
 # Face Recognition Attendance System
 
 ![Face Recognition Attendance System](https://img.shields.io/badge/Face_Recognition_Attendance_System-v1.0-brightgreen)
