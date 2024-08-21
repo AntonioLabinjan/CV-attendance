@@ -1,6 +1,6 @@
-### Forši napravit još neki smisleni auth system - ideja: 
-
-lakša verzija: pustit ručno postavljanje i samo zahtijevat login za rutu. (praktički sve rute zahtijevaju login, osim one za face scan)
+### Iman auth sistem, samo ga tiba povezat na app, a to mi se ne da sada delat :)
+### Nalazi se na posebnemu repozitoriju
+### link_will_be_here
 
 + dodat neke filtere za sve i svašta
 
