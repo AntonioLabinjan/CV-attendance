@@ -8,6 +8,8 @@ from transformers import CLIPProcessor, CLIPModel
 import torch
 import sqlite3
 from datetime import datetime, timedelta
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # Initialize CLIP model and processor
 model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
@@ -19,6 +21,30 @@ known_face_names = []
 
 # Track attendance for the current session
 logged_names = set()
+
+app = Flask(__name__)
+
+app.secret_key = 'DO_NOT_VISIT_GRMIALDA'
+
+
+# Flask-Login setup
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+# User model
+class User(UserMixin):
+    def __init__(self, id, username, password):
+        self.id = id
+        self.username = username
+        self.password = password
+
+# In-memory user storage (can be replaced with a database)
+users = {}
+
+@login_manager.user_loader
+def load_user(user_id):
+    return users.get(int(user_id))
 
 # Function to add a known face
 def add_known_face(image_path, name):
@@ -59,10 +85,6 @@ video_capture = cv2.VideoCapture(0)
 # Face detection using Haar Cascade
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
-app = Flask(__name__)
-
-app.secret_key = 'DO_NOT_VISIT_GRMIALDA'
-
 def create_db():
     conn = sqlite3.connect('attendance.db')
     c = conn.cursor()
@@ -80,7 +102,46 @@ attendance_date = None
 start_time = None
 end_time = None
 
+from werkzeug.security import generate_password_hash, check_password_hash
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+
+        user_id = len(users) + 1
+        new_user = User(user_id, username, hashed_password)
+        users[user_id] = new_user
+
+        return redirect(url_for('login'))
+    return render_template('signup.html')
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        user = next((u for u in users.values() if u.username == username), None)
+        if user and check_password_hash(user.password, password):
+            login_user(user)
+            return redirect(url_for('index'))
+
+        return render_template('login.html', error="Invalid username or password")
+
+    return render_template('login.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
+
 @app.route('/set_subject', methods=['GET', 'POST'])
+@login_required
 def set_subject():
     global current_subject, attendance_date, start_time, end_time
     if request.method == 'POST':
@@ -103,6 +164,7 @@ def is_within_time_interval():
             start_time <= current_time <= end_time)
 
 @app.route('/add_student', methods=['GET', 'POST'])
+@login_required
 def add_student():
     if request.method == 'POST':
         name = request.form['name']
@@ -214,6 +276,7 @@ def index():
     return render_template('index.html')
 
 @app.route('/attendance')
+@login_required
 def attendance():
     conn = sqlite3.connect('attendance.db')
     c = conn.cursor()
@@ -277,6 +340,7 @@ def delete_attendance(id):
     return redirect(url_for('attendance'))
 
 @app.route('/statistics')
+@login_required
 def statistics():
     conn = sqlite3.connect('attendance.db')
     c = conn.cursor()
@@ -291,6 +355,7 @@ def statistics():
     return render_template('statistics.html', student_attendance=student_attendance, subject_attendance=subject_attendance)
 
 @app.route('/students')
+@login_required
 def students():
     conn = sqlite3.connect('attendance.db')
     c = conn.cursor()
@@ -383,6 +448,7 @@ def plot_monthly_attendance():
     return send_file(img, mimetype='image/png')
 
 @app.route('/plots')
+@login_required
 def plots():
     return render_template('plot_router.html')
 
