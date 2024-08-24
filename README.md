@@ -1,6 +1,3 @@
-### Iman auth sistem, samo ga tiba povezat na app, a to mi se ne da sada delat :)
-### Nalazi se na posebnemu repozitoriju
-### https://github.com/AntonioLabinjan/auth_system
 
 ### + dodat neke filtere za sve i svašta
 
