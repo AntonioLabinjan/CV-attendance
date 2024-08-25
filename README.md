@@ -1,6 +1,6 @@
 
 ### + dodat neke filtere za sve i svašta
-### + dokumentacija i onaj weatherapi
+### + dokumentacija 
 # Face Recognition Attendance System
 
 ![Face Recognition Attendance System](https://img.shields.io/badge/Face_Recognition_Attendance_System-v1.0-brightgreen)
