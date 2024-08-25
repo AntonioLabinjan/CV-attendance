@@ -1,7 +1,7 @@
 import os
 import cv2
 import numpy as np
-from flask import Flask, Response, render_template, send_file, request, redirect, url_for
+from flask import Flask, Response, render_template, send_file, request, redirect, url_for, jsonify
 import csv
 import io
 from transformers import CLIPProcessor, CLIPModel
@@ -10,6 +10,7 @@ import sqlite3
 from datetime import datetime, timedelta
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+import requests
 
 # Initialize CLIP model and processor
 model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
@@ -273,7 +274,16 @@ def video_feed():
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    api_key = "fe2e5f9339b2434db60124446241408"
+    location = "London" # Ili nešto drugo
+    weather_condition = get_weather_forecast(api_key, location)
+    
+    if predict_absence_due_to_weather(weather_condition):
+        message = "Bad weather predicted, late entries due to traffic problems are possible."
+    else:
+        message = "No significant weather issues expected. Students should come on time"
+    
+    return render_template('index.html', weather_condition=weather_condition, message=message)
 
 @app.route('/attendance')
 @login_required
@@ -451,6 +461,38 @@ def plot_monthly_attendance():
 @login_required
 def plots():
     return render_template('plot_router.html')
+
+
+
+def get_weather_forecast(api_key, location="your_city"):
+    url = f"http://api.weatherapi.com/v1/forecast.json?key={api_key}&q={location}&days=1"
+    response = requests.get(url)
+    data = response.json()
+    return data["forecast"]["forecastday"][0]["day"]["condition"]["text"]
+
+def predict_absence_due_to_weather(weather_condition):
+    bad_weather_keywords = ["rain", "storm", "snow", "fog", "hurricane"]
+    for keyword in bad_weather_keywords:
+        if keyword in weather_condition.lower():
+            return True
+    return False
+
+@app.route('/predict_absence', methods=['GET'])
+def predict_absence():
+    api_key = "fe2e5f9339b2434db60124446241408"
+    location = "London"
+    weather_condition = get_weather_forecast(api_key, location)
+    
+    if predict_absence_due_to_weather(weather_condition):
+        message = "Bad weather predicted, late entries due to traffic problems are possible."
+    else:
+        message = "No significant weather issues expected. Students should come on time"
+    
+    # Return both the weather condition and the prediction message
+    return jsonify({
+        "weather_condition": weather_condition,
+        "message": message
+    })
 
 '''
 Run the flask app on port 5144
