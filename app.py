@@ -25,6 +25,7 @@ logged_names = set()
 
 app = Flask(__name__)
 
+# ovo bi bilo dobro spremit u .env fajl, ali to ću ben delat
 app.secret_key = 'DO_NOT_VISIT_GRMIALDA'
 
 
@@ -92,6 +93,13 @@ def create_db():
     c.execute('''DROP TABLE IF EXISTS attendance''')
     c.execute('''CREATE TABLE IF NOT EXISTS attendance
                  (name TEXT, date TEXT, time TEXT, subject TEXT, late BOOLEAN DEFAULT 0, UNIQUE(name, date, subject))''')
+    
+    c.execute('''DROP TABLE IF EXISTS announcements''')
+    c.execute('''CREATE TABLE IF NOT EXISTS announcements
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                  date_time TEXT, 
+                  teacher_name TEXT, 
+                  message TEXT)''')
     conn.commit()
     conn.close()
 
@@ -539,6 +547,67 @@ def predict_absence():
         "weather_condition": weather_condition,
         "message": message
     })
+
+@app.route('/announcements', methods=['GET'])
+@login_required
+def announcements():
+    conn = sqlite3.connect('attendance.db')
+    c = conn.cursor()
+    c.execute("SELECT * FROM announcements ORDER BY date_time ASC")
+    announcements = c.fetchall()
+    conn.close()
+    return render_template('announcements.html', announcements=announcements)
+
+@app.route('/post_announcement', methods=['POST'])
+@login_required
+def post_announcement():
+    message = request.form['message']
+    date_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    teacher_name = current_user.username
+
+    conn = sqlite3.connect('attendance.db')
+    c = conn.cursor()
+    c.execute("INSERT INTO announcements (date_time, teacher_name, message) VALUES (?, ?, ?)",
+              (date_time, teacher_name, message))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('announcements'))
+
+@app.route('/delete_announcement/<int:id>', methods=['POST'])
+@login_required
+def delete_announcement(id):
+    conn = sqlite3.connect('attendance.db')
+    c = conn.cursor()
+    c.execute("DELETE FROM announcements WHERE id = ?", (id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('announcements'))
+
+@app.route('/edit_announcement/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_announcement(id):
+    conn = sqlite3.connect('attendance.db')
+    c = conn.cursor()
+
+    if request.method == 'POST':
+        message = request.form['message']
+        date_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        teacher_name = current_user.username
+
+        c.execute("UPDATE announcements SET date_time = ?, message = ? WHERE id = ? AND teacher_name = ?",
+                  (date_time, message, id, teacher_name))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('announcements'))
+    
+    c.execute("SELECT * FROM announcements WHERE id = ?", (id,))
+    announcement = c.fetchone()
+    conn.close()
+
+    if announcement is None or announcement[2] != current_user.username:
+        return redirect(url_for('announcements'))  # Redirect if announcement not found or not owned by user
+
+    return render_template('edit_announcement.html', announcement=announcement)
 
 '''
 Run the flask app on port 5144
