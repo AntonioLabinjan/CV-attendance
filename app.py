@@ -292,6 +292,10 @@ def attendance():
     name_filter = request.args.get('name')
     subject_filter = request.args.get('subject')
     date_filter = request.args.get('date')
+    weekday_filter = request.args.get('weekday')
+    month_filter = request.args.get('month')
+    year_filter = request.args.get('year')
+    late_filter = request.args.get('late')
 
     conn = sqlite3.connect('attendance.db')
     c = conn.cursor()
@@ -312,6 +316,22 @@ def attendance():
         query += " AND date = ?"
         params.append(date_filter)
     
+    if weekday_filter:
+        query += " AND strftime('%w', date) = ?"
+        params.append(weekday_filter)
+    
+    if month_filter:
+        query += " AND strftime('%m', date) = ?"
+        params.append(f"{int(month_filter):02d}")
+    
+    if year_filter:
+        query += " AND strftime('%Y', date) = ?"
+        params.append(year_filter)
+    
+    if late_filter:
+        query += " AND late = ?"
+        params.append(late_filter)
+
     query += " ORDER BY date, time"
     c.execute(query, params)
     
@@ -328,6 +348,7 @@ def attendance():
         grouped_records[date][subject].append((rowid, name, time, late))
     
     return render_template('attendance.html', grouped_records=grouped_records)
+
 
 
 @app.route('/download')
