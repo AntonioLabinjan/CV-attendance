@@ -285,12 +285,36 @@ def index():
     
     return render_template('index.html', weather_condition=weather_condition, message=message)
 
-@app.route('/attendance')
+@app.route('/attendance', methods=['GET'])
 @login_required
 def attendance():
+    # Get filter parameters from the query string
+    name_filter = request.args.get('name')
+    subject_filter = request.args.get('subject')
+    date_filter = request.args.get('date')
+
     conn = sqlite3.connect('attendance.db')
     c = conn.cursor()
-    c.execute("SELECT rowid, subject, name, date, time, late FROM attendance ORDER BY date, time")
+
+    # Build the SQL query dynamically based on the provided filters
+    query = "SELECT rowid, subject, name, date, time, late FROM attendance WHERE 1=1"
+    params = []
+
+    if name_filter:
+        query += " AND name = ?"
+        params.append(name_filter)
+    
+    if subject_filter:
+        query += " AND subject = ?"
+        params.append(subject_filter)
+    
+    if date_filter:
+        query += " AND date = ?"
+        params.append(date_filter)
+    
+    query += " ORDER BY date, time"
+    c.execute(query, params)
+    
     records = c.fetchall()
     conn.close()
 
@@ -304,6 +328,7 @@ def attendance():
         grouped_records[date][subject].append((rowid, name, time, late))
     
     return render_template('attendance.html', grouped_records=grouped_records)
+
 
 @app.route('/download')
 def download_attendance():
