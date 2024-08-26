@@ -1,6 +1,7 @@
 {% extends 'layout.html' %}
 {% block content %}
 <h1>Attendance Records</h1>
+<!-- Attendance Records -->
 {% for date, subjects in grouped_records.items() %}
     <h2>Date: {{ date }}</h2>
     {% for subject, records in subjects.items() %}
@@ -19,5 +20,52 @@
         </ul>
     {% endfor %}
 {% endfor %}
+
 <a href="{{ url_for('download_attendance') }}">Download Attendance CSV</a>
 {% endblock %}
+
+<!-- Filter Form -->
+<form method="GET" action="{{ url_for('attendance') }}">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" value="{{ request.args.get('name', '') }}">
+
+    <label for="subject">Subject:</label>
+    <input type="text" id="subject" name="subject" value="{{ request.args.get('subject', '') }}">
+<br>
+    <label for="date">Date:</label>
+    <input type="date" id="date" name="date" value="{{ request.args.get('date', '') }}">
+<br>
+    <label for="weekday">Weekday:</label>
+    <select id="weekday" name="weekday">
+        <option value="">Any</option>
+        <option value="0" {% if request.args.get('weekday') == '0' %}selected{% endif %}>Sunday</option>
+        <option value="1" {% if request.args.get('weekday') == '1' %}selected{% endif %}>Monday</option>
+        <option value="2" {% if request.args.get('weekday') == '2' %}selected{% endif %}>Tuesday</option>
+        <option value="3" {% if request.args.get('weekday') == '3' %}selected{% endif %}>Wednesday</option>
+        <option value="4" {% if request.args.get('weekday') == '4' %}selected{% endif %}>Thursday</option>
+        <option value="5" {% if request.args.get('weekday') == '5' %}selected{% endif %}>Friday</option>
+        <option value="6" {% if request.args.get('weekday') == '6' %}selected{% endif %}>Saturday</option>
+    </select>
+<br>
+    <label for="month">Month:</label>
+    <select id="month" name="month">
+        <option value="">Any</option>
+        {% for i in range(1, 13) %}
+            <option value="{{ i }}" {% if request.args.get('month')|int == i %}selected{% endif %}>{{ i }}</option>
+        {% endfor %}
+    </select>
+<br>
+    <label for="year">Year:</label>
+    <input type="number" id="year" name="year" value="{{ request.args.get('year', '') }}" min="2000" max="2100">
+<br>
+    <label for="late">Late:</label>
+    <select id="late" name="late">
+        <option value="">Any</option>
+        <option value="1" {% if request.args.get('late') == '1' %}selected{% endif %}>Yes</option>
+        <option value="0" {% if request.args.get('late') == '0' %}selected{% endif %}>No</option>
+    </select>
+<br>
+    <button type="submit">Filter</button>
+    <a href="{{ url_for('attendance') }}"><button type="button">Clear Filters</button></a>
+</form>
+
