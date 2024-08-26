@@ -1,5 +1,3 @@
-
-### + dodat neke filtere za sve i svašta
 ### + dokumentacija (spomenut probleme klasičnih oblika prijave prisutnosti (sporo, fake prijave/potpisi...)
 # Face Recognition Attendance System
 
