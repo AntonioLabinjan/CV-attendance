@@ -217,3 +217,100 @@
 
 ---
 
+### Specification for `/predict_absence` Route
+**Supported Methods:** GET  
+**Functions Used:**
+- **get_weather_forecast(api_key, location="your_city")**: Calls an external weather API to get the weather forecast for a specific location.
+- **predict_absence_due_to_weather(weather_condition)**: Determines if the weather condition is likely to cause absences based on predefined bad weather keywords.
+- **requests.get()**: Sends a GET request to the weather API.
+- **jsonify()**: Converts the response data to a JSON format for easy consumption by clients.
+
+**Templates Rendered:** None  
+**Route Usage:** This route fetches the current weather forecast using a weather API and predicts if there will be possible late arrivals or absences due to bad weather. It returns a JSON response containing the weather condition and a message advising on potential attendance issues.
+
+---
+
+### Specification for `/announcements` Route
+**Supported Methods:** GET  
+**Functions Used:**
+- **sqlite3.connect()**: Connects to the SQLite database `attendance.db`.
+- **c.execute()**: Executes a SQL query to select all announcements ordered by date and time in ascending order.
+- **c.fetchall()**: Fetches all rows from the announcements table as a list of tuples.
+- **conn.close()**: Closes the database connection after retrieving the data.
+- **render_template()**: Renders the `announcements.html` template, passing the list of announcements.
+
+**Templates Rendered:**
+- **announcements.html**: Displays all announcements in chronological order.
+
+**Route Usage:** This route retrieves all announcements from the database, ordered by date and time, and displays them on the `announcements.html` page.
+
+---
+
+### Specification for `/post_announcement` Route
+**Supported Methods:** POST  
+**Functions Used:**
+- **request.form['message']**: Retrieves the message content from the submitted form data.
+- **datetime.now().strftime("%Y-%m-%d %H:%M:%S")**: Gets the current date and time, formatted as a string.
+- **current_user.username**: Retrieves the username of the currently logged-in user.
+- **sqlite3.connect()**: Connects to the SQLite database `attendance.db`.
+- **c.execute()**: Executes a SQL query to insert a new announcement into the announcements table.
+- **conn.commit()**: Commits the transaction to save the new announcement.
+- **conn.close()**: Closes the database connection after saving the data.
+- **redirect(url_for('announcements'))**: Redirects the user back to the announcements page after posting.
+
+**Templates Rendered:** None  
+**Route Usage:** This route allows authenticated users to post a new announcement. The announcement is saved to the database with the current date, time, and the teacher's name, then the user is redirected to the `announcements` page to see the updated list.
+
+---
+
+### Specification for `/delete_announcement/<int:id>` Route
+**Supported Methods:** POST  
+**Functions Used:**
+- **sqlite3.connect()**: Connects to the SQLite database `attendance.db`.
+- **c.execute()**: Executes a SQL query to delete an announcement by its ID.
+- **conn.commit()**: Commits the transaction to remove the announcement from the database.
+- **conn.close()**: Closes the database connection after deleting the data.
+- **redirect(url_for('announcements'))**: Redirects the user back to the announcements page after deletion.
+
+**Templates Rendered:** None  
+**Route Usage:** This route allows authenticated users to delete an announcement by its ID. After deletion, the user is redirected to the `announcements` page.
+
+---
+
+### Specification for `/edit_announcement/<int:id>` Route
+**Supported Methods:** GET, POST  
+**Functions Used:**
+- **sqlite3.connect()**: Connects to the SQLite database `attendance.db`.
+- **request.method == 'POST'**: Checks if the request method is POST, indicating that the form was submitted.
+- **request.form['message']**: Retrieves the updated message content from the submitted form data.
+- **datetime.now().strftime("%Y-%m-%d %H:%M:%S")**: Gets the current date and time, formatted as a string.
+- **current_user.username**: Retrieves the username of the currently logged-in user.
+- **c.execute()**: Executes a SQL query to update the announcement if the user is the owner.
+- **conn.commit()**: Commits the transaction to save the updated announcement.
+- **conn.close()**: Closes the database connection after saving the data.
+- **redirect(url_for('announcements'))**: Redirects the user back to the announcements page after editing.
+- **render_template('edit_announcement.html', announcement=announcement)**: Renders the `edit_announcement.html` template, passing the current announcement data for editing.
+
+**Templates Rendered:**
+- **edit_announcement.html**: Displays the form for editing the announcement's message.
+
+**Route Usage:** This route allows authenticated users to edit an announcement they posted. It first checks if the user owns the announcement, then updates it. If the method is GET, the current announcement is displayed in an edit form. If POST, the changes are saved and the user is redirected to the `announcements` page.
+
+---
+
+### Specification for `/report` Route
+**Supported Methods:** GET  
+**Functions Used:**
+- **sqlite3.connect()**: Connects to the SQLite database `attendance.db`.
+- **cur.execute()**: Executes a SQL query to select distinct subjects and count lectures and student attendance.
+- **cur.fetchall()**: Fetches all results of the executed queries.
+- **conn.close()**: Closes the database connection after retrieving the data.
+- **render_template('attendance_report.html', report=report)**: Renders the `attendance_report.html` template, passing the report data.
+
+**Templates Rendered:**
+- **attendance_report.html**: Displays the attendance report for each subject, including student attendance percentages and a status indicating if they meet the attendance requirement.
+
+**Route Usage:** This route generates a detailed attendance report by subject. It counts the total lectures for each subject and the number of lectures each student attended, calculates attendance percentages, and checks if the student meets the 50% attendance requirement. The report is displayed on the `attendance_report.html` page.
+
+---
+
