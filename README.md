@@ -1,6 +1,13 @@
 ### + dokumentacija (spomenut probleme klasičnih oblika prijave prisutnosti (sporo, fake prijave/potpisi...)
 # Face Recognition Attendance System
 
+
+Test credentials:
+Email: alabinjan6@gmail.com
+Username: Antonio
+Password: 4uGnsUh9!!!
+
+
 ![Face Recognition Attendance System](https://img.shields.io/badge/Face_Recognition_Attendance_System-v1.0-brightgreen)
 
 A simple and effective Face Recognition Attendance System using CLIP model for face embeddings and OpenCV for real-time face detection. This project captures and logs attendance in real-time based on recognized faces.
