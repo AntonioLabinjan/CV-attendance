@@ -22,7 +22,7 @@
 {% endfor %}
 
 <a href="{{ url_for('download_attendance') }}">Download Attendance CSV</a>
-{% endblock %}
+
 
 <!-- Filter Form -->
 <form method="GET" action="{{ url_for('attendance') }}">
@@ -69,3 +69,4 @@
     <a href="{{ url_for('attendance') }}"><button type="button">Clear Filters</button></a>
 </form>
 
+{% endblock %}
