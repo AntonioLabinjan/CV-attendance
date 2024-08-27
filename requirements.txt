@@ -3,7 +3,7 @@ Flask-Login==0.6.2
 Flask-WTF==1.0.1
 numpy==1.25.2
 opencv-python==4.8.0.76
-torch==2.0.1+cpu
+torch==2.0.1
 transformers==4.33.0
 requests==2.31.0
 werkzeug==2.3.4
