@@ -669,7 +669,7 @@ def report():
     return render_template('attendance_report.html', report=report)
 
 
-# Ruta koja će dohvatit sva kašnjenja, s predmetima i entry timeon
+# Tu ubacit još malo neke more advanced analize :) i obavezno vizalizaciju
 
 import datetime
 from collections import Counter
