@@ -609,6 +609,64 @@ def edit_announcement(id):
 
     return render_template('edit_announcement.html', announcement=announcement)
 
+# Ruta koja će najprije provjerit koliko predaanja je održano iz pojedinega predmeta
+# Onda će provjerit za svakega studenta na koliko predavanja je bija
+# To prikazat na način => veliki header=> naziv predmeta i ukupan broj predavanja, i ispod se izlistaju svi studenti koji su ikad bili na predmetu s brojen koliko puta su bili
+
+@app.route('/report')
+@login_required
+def report():
+    # Establish connection to the database
+    conn = sqlite3.connect('attendance.db')
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    # Fetch all distinct subjects
+    cur.execute('SELECT DISTINCT subject FROM attendance')
+    subjects = cur.fetchall()
+
+    report = []
+
+    for subject in subjects:
+        subject_name = subject['subject']
+
+        # Count the total number of lectures for the subject
+        cur.execute('SELECT COUNT(DISTINCT date) as total_lectures FROM attendance WHERE subject = ?', (subject_name,))
+        total_lectures = cur.fetchone()['total_lectures']
+
+        # Count the number of lectures attended by each student for this subject
+        cur.execute('''SELECT name, COUNT(*) as attended_lectures 
+                       FROM attendance 
+                       WHERE subject = ? 
+                       GROUP BY name''', 
+                    (subject_name,))
+        students_attendance = cur.fetchall()
+
+        # Add percentage calculation and requirement check for each student
+        students_with_status = []
+        for student in students_attendance:
+            attendance_percentage = (student['attended_lectures'] / total_lectures) * 100
+            meets_requirement = attendance_percentage >= 50
+            students_with_status.append({
+                'name': student['name'],
+                'attended_lectures': student['attended_lectures'],
+                'attendance_percentage': attendance_percentage,
+                'meets_requirement': meets_requirement
+            })
+
+        # Prepare the report for this subject
+        report.append({
+            'subject': subject_name,
+            'total_lectures': total_lectures,
+            'students': students_with_status
+        })
+
+    # Close the connection
+    conn.close()
+
+    # Render the report using the HTML template
+    return render_template('attendance_report.html', report=report)
+
 '''
 Run the flask app on port 5144
 '''
