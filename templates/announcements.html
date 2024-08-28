@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Announcements</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <h1>Announcements</h1>
+    <form action="{{ url_for('post_announcement') }}" method="post">
+        <textarea name="message" rows="4" cols="50" placeholder="Write your announcement here..."></textarea><br>
+        <input type="submit" value="Post Announcement">
+    </form>
+    <h2>All Announcements</h2>
+    <ul>
+        {% for announcement in announcements %}
+            <li>
+                <strong>{{ announcement[1] }} - {{ announcement[2] }}:</strong> {{ announcement[3] }}
+                {% if current_user.username == announcement[2] %}
+                    <a href="{{ url_for('edit_announcement', id=announcement[0]) }}">Edit</a>
+                    <form action="{{ url_for('delete_announcement', id=announcement[0]) }}" method="post" style="display:inline;">
+                        <input type="submit" value="Delete">
+                    </form>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+    <a href="{{ url_for('index') }}">Back to Home</a>
+</body>
+</html>

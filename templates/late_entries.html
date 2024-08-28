@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Late Attendance Entries Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Late Attendance Entries Analysis</h1>
+        
+        {% if late_entries %}
+            <h2>Analysis:</h2>
+            {% if most_common_hour %}
+                <p>The most common hour for late entries is: {{ most_common_hour[0] }}:00 with {{ most_common_hour[1] }} late entries.</p>
+            {% else %}
+                <p>No data available for hour analysis.</p>
+            {% endif %}
+
+            {% if most_common_weekday %}
+                <p>The most common weekday for late entries is: 
+                   {% if most_common_weekday[0] == 0 %} Monday 
+                   {% elif most_common_weekday[0] == 1 %} Tuesday 
+                   {% elif most_common_weekday[0] == 2 %} Wednesday 
+                   {% elif most_common_weekday[0] == 3 %} Thursday 
+                   {% elif most_common_weekday[0] == 4 %} Friday 
+                   {% elif most_common_weekday[0] == 5 %} Saturday 
+                   {% elif most_common_weekday[0] == 6 %} Sunday 
+                   {% endif %}
+                   with {{ most_common_weekday[1] }} late entries.
+                </p>
+            {% else %}
+                <p>No data available for weekday analysis.</p>
+            {% endif %}
+
+            <h2>Late Entries:</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Date</th>
+                        <th>Time In</th>
+                        <th>Subject</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in late_entries %}
+                        <tr>
+                            <td>{{ entry[0] }}</td> <!-- Name -->
+                            <td>{{ entry[1] }}</td> <!-- Date -->
+                            <td>{{ entry[2] }}</td> <!-- Time -->
+                            <td>{{ entry[3] }}</td> <!-- Subject -->
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No late entries found.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
