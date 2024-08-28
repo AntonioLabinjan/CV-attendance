@@ -667,8 +667,21 @@ def report():
     # Render the report using the HTML template
     return render_template('attendance_report.html', report=report)
 
+
+# Ruta koja će dohvatit sva kašnjenja, s predmetima i entry timeon
+
+@app.route('/late_analysis', methods = ["GET", "POST"] )
+@login_required
+def late_entries():
+    conn = sqlite3.connect('attendance.db')
+    c = conn.cursor()
+    c.execute("SELECT * FROM attendance WHERE late = 1")
+    late_entries = c.fetchall()
+    conn.close()
+
+    return render_template('late_entries.html', late_entries=late_entries)
 '''
 Run the flask app on port 5144
 '''
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5144)
+    app.run(host="0.0.0.0", port=5144, debug=True)
