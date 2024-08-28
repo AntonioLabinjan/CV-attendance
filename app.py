@@ -7,6 +7,7 @@ import io
 from transformers import CLIPProcessor, CLIPModel
 import torch
 import sqlite3
+import datetime
 from datetime import datetime, timedelta
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -166,7 +167,7 @@ def set_subject():
     return render_template('set_subject.html')
 
 def is_within_time_interval():
-    now = datetime.now()
+    now = datetime.datetime.now()
     current_time = now.strftime("%H:%M")
     current_date = now.strftime("%Y-%m-%d")
     return (current_date == attendance_date and 
@@ -204,12 +205,12 @@ def log_attendance(name, frame):
         print("Subject is not set or current time is outside of allowed interval. Attendance not logged.")
         return frame
 
-    now = datetime.now()
+    now = datetime.datetime.now()
     date = now.strftime("%Y-%m-%d")
     time = now.strftime("%H:%M:%S")
 
     # Create datetime object for start time
-    start_time_obj = datetime.strptime(f"{attendance_date} {start_time}", "%Y-%m-%d %H:%M")
+    start_time_obj = datetime.datetime.strptime(f"{attendance_date} {start_time}", "%Y-%m-%d %H:%M")
 
     # Calculate the late threshold time
     late_time_obj = start_time_obj + timedelta(minutes=14)
@@ -670,16 +671,51 @@ def report():
 
 # Ruta koja će dohvatit sva kašnjenja, s predmetima i entry timeon
 
-@app.route('/late_analysis', methods = ["GET", "POST"] )
+import datetime
+from collections import Counter
+
+@app.route('/late_analysis', methods=["GET", "POST"])
 @login_required
 def late_entries():
     conn = sqlite3.connect('attendance.db')
     c = conn.cursor()
+
+    # Fetch all late entries
     c.execute("SELECT * FROM attendance WHERE late = 1")
     late_entries = c.fetchall()
     conn.close()
 
-    return render_template('late_entries.html', late_entries=late_entries)
+    # Initialize counters
+    hour_counter = Counter()
+    weekday_counter = Counter()
+
+    for entry in late_entries:
+        time_in = entry[2]  # Assuming the 'time' is the third column
+        date = entry[1]     # Assuming the 'date' is the second column
+
+        # Print time_in for debugging
+        print(f"time_in: {time_in}")  # Debugging line
+
+        # Convert time and date to appropriate formats
+        time_obj = datetime.datetime.strptime(time_in, "%H:%M:%S")  # Updated format
+        date_obj = datetime.datetime.strptime(date, "%Y-%m-%d")
+        
+        # Count the hour
+        hour_counter[time_obj.hour] += 1
+        
+        # Count the weekday (0=Monday, 6=Sunday)
+        weekday_counter[date_obj.weekday()] += 1
+
+    # Convert results to lists for template rendering
+    most_common_hour = hour_counter.most_common(1)[0] if hour_counter else None
+    most_common_weekday = weekday_counter.most_common(1)[0] if weekday_counter else None
+
+    return render_template('late_entries.html', 
+                           late_entries=late_entries, 
+                           most_common_hour=most_common_hour, 
+                           most_common_weekday=most_common_weekday)
+
+
 '''
 Run the flask app on port 5144
 '''
