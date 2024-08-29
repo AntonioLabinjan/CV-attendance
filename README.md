@@ -1,4 +1,5 @@
 ### + dokumentacija (spomenut probleme klasičnih oblika prijave prisutnosti (sporo, fake prijave/potpisi...)
+### dodat provjere u signup rutu (duljina passworda, dali ima slova/brojeve itd.)
 ### provat dodat neke unit testove
 # Face Recognition Attendance System
 
