@@ -34,6 +34,11 @@
                 <p>No data available for weekday analysis.</p>
             {% endif %}
 
+            {% if plot_url %}
+                <h2>Late Entries by Hour</h2>
+                <img src="data:image/png;base64,{{ plot_url }}" alt="Late Entries by Hour">
+            {% endif %}
+
             <h2>Late Entries:</h2>
             <table>
                 <thead>
