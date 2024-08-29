@@ -167,7 +167,7 @@ def set_subject():
     return render_template('set_subject.html')
 
 def is_within_time_interval():
-    now = datetime.datetime.now()
+    now = datetime.now()
     current_time = now.strftime("%H:%M")
     current_date = now.strftime("%Y-%m-%d")
     return (current_date == attendance_date and 
@@ -205,12 +205,12 @@ def log_attendance(name, frame):
         print("Subject is not set or current time is outside of allowed interval. Attendance not logged.")
         return frame
 
-    now = datetime.datetime.now()
+    now = datetime.now()
     date = now.strftime("%Y-%m-%d")
     time = now.strftime("%H:%M:%S")
 
     # Create datetime object for start time
-    start_time_obj = datetime.datetime.strptime(f"{attendance_date} {start_time}", "%Y-%m-%d %H:%M")
+    start_time_obj = datetime.strptime(f"{attendance_date} {start_time}", "%Y-%m-%d %H:%M")
 
     # Calculate the late threshold time
     late_time_obj = start_time_obj + timedelta(minutes=14)
@@ -669,10 +669,11 @@ def report():
     return render_template('attendance_report.html', report=report)
 
 
-# Tu ubacit još malo neke more advanced analize :) i obavezno vizalizaciju
+# Ruta koja će dohvatit sva kašnjenja, s predmetima i entry timeon
 
-import datetime
-from collections import Counter
+from collections import Counter 
+import base64
+import io
 
 @app.route('/late_analysis', methods=["GET", "POST"])
 @login_required
@@ -693,12 +694,9 @@ def late_entries():
         time_in = entry[2]  # Assuming the 'time' is the third column
         date = entry[1]     # Assuming the 'date' is the second column
 
-        # Print time_in for debugging
-        print(f"time_in: {time_in}")  # Debugging line
-
         # Convert time and date to appropriate formats
-        time_obj = datetime.datetime.strptime(time_in, "%H:%M:%S")  # Updated format
-        date_obj = datetime.datetime.strptime(date, "%Y-%m-%d")
+        time_obj = datetime.strptime(time_in, "%H:%M:%S")
+        date_obj = datetime.strptime(date, "%Y-%m-%d")
         
         # Count the hour
         hour_counter[time_obj.hour] += 1
@@ -710,10 +708,34 @@ def late_entries():
     most_common_hour = hour_counter.most_common(1)[0] if hour_counter else None
     most_common_weekday = weekday_counter.most_common(1)[0] if weekday_counter else None
 
+    # Ensure all hours from 0 to 23 are represented
+    hours = list(range(24))
+    hour_counts = [hour_counter.get(hour, 0) for hour in hours]  # Get count or 0 if not in the counter
+
+    # Visualization
+    if hour_counter:
+        plt.bar(hours, hour_counts)
+        plt.xticks(hours)  # Ensure all hours are labeled on the x-axis
+        plt.xlabel('Hour of the Day')
+        plt.ylabel('Number of Late Entries')
+        plt.title('Late Entries by Hour')
+
+        img = io.BytesIO()
+        plt.savefig(img, format='png')
+        img.seek(0)
+        plot_url = base64.b64encode(img.getvalue()).decode()
+        plt.close()
+    else:
+        plot_url = None
+
     return render_template('late_entries.html', 
                            late_entries=late_entries, 
                            most_common_hour=most_common_hour, 
-                           most_common_weekday=most_common_weekday)
+                           most_common_weekday=most_common_weekday,
+                           plot_url=plot_url)
+
+
+
 
 
 '''
