@@ -1,4 +1,5 @@
 ### + dokumentacija (spomenut probleme klasičnih oblika prijave prisutnosti (sporo, fake prijave/potpisi...)
+### provat dodat neke unit testove
 # Face Recognition Attendance System
 
 Test credentials:
