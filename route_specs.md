@@ -1,3 +1,5 @@
+# Ovo je totalni chatGPT :)
+
 ### Specification for `/set_subject` Route
 
 - **Supported Methods**: `GET`, `POST`
@@ -313,4 +315,39 @@
 **Route Usage:** This route generates a detailed attendance report by subject. It counts the total lectures for each subject and the number of lectures each student attended, calculates attendance percentages, and checks if the student meets the 50% attendance requirement. The report is displayed on the `attendance_report.html` page.
 
 ---
+
+### Specification for `/late_analysis` Route
+
+- **Supported Methods**: `GET`, `POST`
+- **Functions Used**:
+  - **`sqlite3.connect('attendance.db')`**: Connects to the SQLite database `attendance.db`.
+  - **`c.execute()`**: Executes SQL queries to fetch all entries marked as "late" from the `attendance` table.
+  - **`c.fetchall()`**: Fetches all rows resulting from the executed query as a list of tuples.
+  - **`Counter()`**: Utilizes Python’s `collections.Counter` to count the frequency of late entries by hour and weekday.
+  - **`datetime.strptime()`**: Converts string representations of date and time into `datetime` objects for further analysis.
+  - **`plt.bar()`**: Creates a bar chart using Matplotlib to visualize the distribution of late entries by hour.
+  - **`plt.xticks()`**: Ensures all hours from 0 to 23 are labeled on the x-axis of the plot.
+  - **`plt.xlabel()`, `plt.ylabel()`, `plt.title()`**: Sets the labels and title for the plot.
+  - **`io.BytesIO()`**: Creates an in-memory binary stream to store the generated plot image.
+  - **`plt.savefig()`**: Saves the generated plot as a PNG image in the binary stream.
+  - **`base64.b64encode()`**: Encodes the binary image data as a base64 string for easy embedding in HTML.
+  - **`render_template()`**: Renders the `late_entries.html` template, passing relevant data for display.
+
+- **Templates Rendered**:
+  - **`late_entries.html`**: Displays the list of late entries, the most common hour and weekday for late arrivals, and a bar chart visualizing the frequency of late entries by hour.
+
+- **Route Usage**:
+  - **Data Collection**:
+    - Retrieves all entries from the `attendance` database where the `late` flag is set to 1.
+    - Analyzes the `time` and `date` fields to determine the most common hour and weekday for late arrivals.
+  - **Data Visualization**:
+    - Creates a bar chart showing the distribution of late entries by hour of the day.
+    - Encodes the plot image as a base64 string for embedding directly into the rendered HTML.
+  - **Rendering**:
+    - Renders the `late_entries.html` template, displaying:
+      - The list of late entries.
+      - The most common hour and weekday for late arrivals.
+      - The bar chart of late entries by hour.
+  - **Edge Cases**:
+    - If no late entries are found, the route handles the absence of data gracefully, ensuring the page still loads without errors.
 
