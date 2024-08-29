@@ -1,8 +1,6 @@
 ### + dokumentacija (spomenut probleme klasičnih oblika prijave prisutnosti (sporo, fake prijave/potpisi...)
 # Face Recognition Attendance System
 
-## JOŠ JENO MALO POJAČAT ONU LATE ENTRY ANALIZU
-
 Test credentials:
 Email: alabinjan6@gmail.com
 Username: Antonio
