@@ -1,0 +1,57 @@
+### REST (Representational State Transfer)
+**REST** is an architectural style used for designing networked applications, specifically web services. It relies on a stateless, client-server communication protocol—most commonly HTTP. RESTful services are characterized by a few key principles:
+
+1. **Stateless**: Each request from a client to a server must contain all the information needed to understand and process the request. The server does not store any client context between requests.
+  
+2. **Client-Server**: The client and server are separate entities, where the client interacts with the server via requests, and the server processes these requests and sends back a response.
+  
+3. **Cacheable**: Responses from the server can be cached by clients or intermediaries to improve performance.
+  
+4. **Uniform Interface**: REST defines a uniform interface between clients and servers, simplifying the architecture. This usually means using standard HTTP methods like GET, POST, PUT, DELETE, etc.
+  
+5. **Layered System**: REST allows an architecture to be composed of hierarchical layers, with each layer performing different functions.
+  
+6. **Code on Demand (optional)**: Servers can temporarily extend or customize client functionality by transferring executable code.
+
+### CRUD (Create, Read, Update, Delete)
+**CRUD** refers to the four basic operations for managing resources in a database or system, which map directly to HTTP methods in RESTful services:
+
+- **Create**: Creating a new resource. This is typically done with an HTTP `POST` request.
+- **Read**: Retrieving a resource or resources. This is generally achieved using an HTTP `GET` request.
+- **Update**: Modifying an existing resource. This is often implemented with HTTP `PUT` or `PATCH` requests.
+- **Delete**: Removing a resource. This corresponds to an HTTP `DELETE` request.
+
+### HTTP Requests
+**HTTP requests** are the means by which a client (usually a web browser or other client-side application) communicates with a server over the web. Each HTTP request consists of:
+
+1. **Request Line**: This includes the HTTP method (e.g., GET, POST), the resource URL, and the HTTP version.
+2. **Headers**: These provide metadata about the request, such as the `Host`, `Content-Type`, `Authorization`, etc.
+3. **Body**: The body of the request (if applicable) contains the data being sent to the server. For instance, when submitting a form via a POST request, the form data is in the body.
+
+### HTTP Status Codes
+**HTTP status codes** are three-digit numbers sent by the server in response to a client's request. They indicate the result of the request. Common status codes include:
+
+- **200 OK**: The request was successful, and the server responded with the requested resource.
+- **201 Created**: The request was successful, and a new resource was created as a result.
+- **204 No Content**: The request was successful, but there is no content to send in the response.
+- **301 Moved Permanently**: The requested resource has been moved to a new URL permanently.
+- **400 Bad Request**: The server could not understand the request due to invalid syntax.
+- **401 Unauthorized**: Authentication is required and has failed or has not been provided.
+- **403 Forbidden**: The server understood the request but refuses to authorize it.
+- **404 Not Found**: The requested resource could not be found on the server.
+- **500 Internal Server Error**: The server encountered an unexpected condition that prevented it from fulfilling the request.
+- **503 Service Unavailable**: The server is not ready to handle the request, often due to overload or maintenance.
+
+### HTTP Methods
+**HTTP methods** define the action to be performed on the resource specified in the URL. The most commonly used methods are:
+
+- **GET**: Requests a representation of the specified resource. This method is used to retrieve data from a server at the specified resource. GET requests should not modify data.
+- **POST**: Submits data to be processed to a specified resource. This method is commonly used to create a new resource.
+- **PUT**: Replaces all current representations of the target resource with the request payload. It is used to update an existing resource or create a resource if it does not exist.
+- **PATCH**: Applies partial modifications to a resource. It is used for updates where only a subset of the resource’s data needs to be modified.
+- **DELETE**: Removes the specified resource.
+- **HEAD**: Similar to GET, but it only requests the headers that would be returned by a GET request. The body of the response is not included.
+- **OPTIONS**: Describes the communication options for the target resource. It is used to determine the supported methods and features of a resource.
+- **TRACE**: Performs a message loop-back test along the path to the target resource, used for diagnostic purposes.
+
+These concepts form the foundation of RESTful web services, enabling standardized communication over the web using HTTP
