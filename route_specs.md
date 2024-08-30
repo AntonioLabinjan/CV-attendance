@@ -351,3 +351,24 @@
   - **Edge Cases**:
     - If no late entries are found, the route handles the absence of data gracefully, ensuring the page still loads without errors.
 
+---
+
+### Specification for `/download_and_email` Route
+
+**Supported Methods:**  
+- GET
+
+**Functions Used:**
+- `sqlite3.connect()`: Establishes a connection to the `attendance.db` SQLite database.
+- `c.execute()`: Executes a SQL query to retrieve attendance records, ordered by subject, date, and time.
+- `c.fetchall()`: Fetches all rows from the executed SQL query.
+- `io.StringIO()`: Creates an in-memory string buffer to store CSV data.
+- `csv.writer()`: Writes CSV data to the string buffer.
+- `request.args.get('email')`: Retrieves the user's email address from the query parameters.
+- `render_template()`: Renders the HTML template `download.html` with the generated CSV data and user's email.
+
+**Templates Rendered:**
+- `download.html`: Renders a page that allows the user to download the generated CSV file and includes a button to open Gmail with the user's email pre-filled as the sender.
+
+**Route Usage:**
+- This route allows users to download attendance data in CSV format and provides an option to open Gmail in a new tab with the user's email pre-filled. The attendance data is grouped by subject and ordered by date and time. The user's email is passed through the query parameters or session, and the generated CSV data is embedded in the HTML template for download.
