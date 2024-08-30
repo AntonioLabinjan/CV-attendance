@@ -114,19 +114,55 @@ end_time = None
 
 from werkzeug.security import generate_password_hash, check_password_hash
 
+# Tu dodat neke checkove kad se kreira password (minimalna duljina, mora imat slova/brojeve/znakove itd.)
+
+import re
+from flask import flash
+
+# A helper function to validate the password
+def validate_password(password):
+    if len(password) < 8:
+        return "Password must be at least 8 characters long."
+    if not re.search(r"[A-Z]", password):
+        return "Password must contain at least one uppercase letter."
+    if not re.search(r"[a-z]", password):
+        return "Password must contain at least one lowercase letter."
+    if not re.search(r"\d", password):
+        return "Password must contain at least one number."
+    if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
+        return "Password must contain at least one special character."
+    return None
+
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+
+        # Check if the username is already taken
+        if any(user.username == username for user in users.values()):
+            flash("Username already taken. Please choose a different one.")
+            return redirect(url_for('signup'))
+
+        # Validate the password
+        password_error = validate_password(password)
+        if password_error:
+            flash(password_error)
+            print(password_error)
+            return redirect(url_for('signup'))
+
+        # If the password is valid, hash it and create a new user
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
 
         user_id = len(users) + 1
         new_user = User(user_id, username, hashed_password)
         users[user_id] = new_user
 
+        flash("Signup successful! Please log in.")
         return redirect(url_for('login'))
+
     return render_template('signup.html')
+
 
 
 @app.route('/login', methods=['GET', 'POST'])
