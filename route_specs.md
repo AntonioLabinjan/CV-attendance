@@ -372,3 +372,29 @@
 
 **Route Usage:**
 - This route allows users to download attendance data in CSV format and provides an option to open Gmail in a new tab with the user's email pre-filled. The attendance data is grouped by subject and ordered by date and time. The user's email is passed through the query parameters or session, and the generated CSV data is embedded in the HTML template for download.
+
+**Functions Used (continued):**
+- **`request.args.get('email')`**: Retrieves the email address passed as a query parameter in the GET request.
+- **`EmailMessage()`**: Creates a new email message object.
+- **`msg.set_content()`**: Sets the plain text content of the email.
+- **`msg.add_attachment()`**: Attaches the generated CSV file to the email.
+- **`smtplib.SMTP()`**: Connects to an SMTP server for sending the email.
+- **`smtplib.SMTP_SSL()`**: Optionally, connects to the SMTP server using SSL encryption.
+- **`smtp.send_message()`**: Sends the email message.
+- **`smtp.quit()`**: Closes the connection to the SMTP server.
+- **`Response()`**: Sends a JSON response back to the client indicating the success or failure of the email operation.
+
+**Templates Rendered:**  
+- None (this route directly generates and sends a CSV file and an email).
+
+**Route Usage:**
+- **Data Generation:**
+  - Retrieves attendance records from the database and writes them into a CSV format.
+  - Stores the CSV data in an in-memory string buffer.
+- **Email Preparation:**
+  - Prepares an email with the attendance CSV file attached.
+  - Uses the email address provided as a query parameter to send the email.
+- **Response Handling:**
+  - Sends a JSON response back to the client, indicating whether the email was sent successfully or if there was an error.
+- **Edge Cases:**
+  - Handles cases where no email is provided or if the email sending fails, ensuring appropriate error messages are returned in the JSON response.
