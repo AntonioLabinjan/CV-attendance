@@ -431,6 +431,48 @@ def download_attendance():
     
     return Response(output, mimetype="text/csv", headers={"Content-Disposition": "attachment;filename=attendance.csv"})
 
+
+@app.route('/download_and_email')
+def download_and_email_attendance():
+    conn = sqlite3.connect('attendance.db')
+    c = conn.cursor()
+    c.execute("SELECT subject, name, date, time FROM attendance ORDER BY subject, date, time")
+    records = c.fetchall()
+    conn.close()
+
+    # Create a string buffer to write CSV data
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    # Initialize previous subject to keep track of subject changes
+    previous_subject = None
+
+    # Write CSV headers
+    writer.writerow(['Subject', 'Name', 'Date', 'Time'])
+
+    # Write CSV data grouped by subject
+    for record in records:
+        subject, name, date, time = record
+
+        if subject != previous_subject:
+            if previous_subject is not None:
+                writer.writerow([])  # Add an empty row for separation between subjects
+            writer.writerow([subject])  # Write the subject name as a new section header
+            previous_subject = subject
+
+        writer.writerow(['', name, date, time])
+
+    # Seek to the beginning of the stream
+    output.seek(0)
+
+    # Prepare the CSV data
+    csv_data = output.getvalue()
+
+    # Assuming you have the user's email from the session or request
+    user_email = request.args.get('email')  # Or get it from session
+
+    return render_template('download.html', csv_data=csv_data, user_email=user_email)
+
 @app.route('/delete_attendance/<int:id>', methods=['POST'])
 def delete_attendance(id):
     conn = sqlite3.connect('attendance.db')
