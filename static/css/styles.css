@@ -1,148 +1,103 @@
-/* styles.css */
-
+/* General Body Styling */
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #222; /* Darker background */
+    color: #e0e0e0; /* Lighter text */
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
+    text-align: center;
 }
 
-h1, h2, h3 {
-    color: #333;
+/* Header */
+h1 {
+    font-size: 3em;
+    color: #f39c12; /* Gold accent */
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 20px;
+    text-shadow: 3px 3px 0 #000, 6px 6px 0 #f39c12;
 }
 
+/* Forms */
+form {
+    background-color: #333; /* Darker form background */
+    padding: 20px;
+    margin: 0 auto;
+    width: 300px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 20px #f39c12; /* Gold shadow */
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    width: calc(100% - 22px);
+    padding: 10px;
+    margin: 10px 0;
+    border: none;
+    border-bottom: 3px solid #f39c12; /* Gold accent */
+    background-color: #222;
+    color: #e0e0e0;
+    font-size: 1em;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+    border-bottom: 3px solid #e67e22; /* Orange accent */
+    outline: none;
+}
+
+/* Buttons */
+button[type="submit"] {
+    background-color: #f39c12; /* Gold button */
+    color: #222; /* Dark text */
+    padding: 10px 20px;
+    font-size: 1.2em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover {
+    background-color: #e67e22; /* Darker orange */
+}
+
+/* Links */
 a {
-    color: #007bff;
+    color: #f39c12; /* Gold links */
     text-decoration: none;
+    transition: color 0.3s ease;
 }
 
 a:hover {
-    text-decoration: underline;
+    color: #e67e22; /* Darker orange */
+    text-shadow: 0px 0px 5px #f39c12;
 }
 
-header {
-    background-color: #00e1ff;
-    color: #fff;
-    padding: 1em 0;
-    text-align: center;
-}
-
-nav ul {
-    list-style: none;
-    padding: 0;
-}
-
-nav ul li {
-    display: inline;
-    margin: 0 15px;
-}
-
-.container {
-    width: 80%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    background: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-form {
-    background: #fff;
-    padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-form input[type="text"],
-form input[type="file"],
-form button {
-    display: block;
-    width: 100%;
-    margin: 10px 0;
+/* Flash Messages */
+ul li {
+    list-style-type: none;
     padding: 10px;
-    font-size: 16px;
-}
-
-form button {
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-}
-
-form button:hover {
-    background-color: #0056b3;
-}
-
-.table-container {
-    margin-top: 20px;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 20px 0;
-}
-
-table, th, td {
-    border: 1px solid #ddd;
-}
-
-th, td {
-    padding: 12px;
-    text-align: left;
-}
-
-th {
-    background-color: #007bff;
-    color: white;
-}
-
-tr:nth-child(even) {
-    background-color: #f2f2f2;
-}
-
-tr:hover {
-    background-color: #ddd;
-}
-
-footer {
-    background-color: #333;
-    color: #fff;
-    text-align: center;
-    padding: 1em 0;
-    position: fixed;
-    width: 100%;
-    bottom: 0;
-}
-
-.btn {
-    display: inline-block;
-    padding: 10px 20px;
-    margin: 10px;
-    background-color: #007bff;
-    color: #fff;
-    text-align: center;
-    text-decoration: none;
+    background-color: #444; /* Dark background for messages */
+    color: #f39c12; /* Gold text */
     border-radius: 5px;
-    font-size: 16px;
-    transition: background-color 0.3s;
+    margin: 10px auto;
+    width: 60%;
+    box-shadow: 0px 0px 10px #e67e22; /* Orange shadow */
+    animation: flashAnimation 1s ease-in-out;
 }
 
-.btn:hover {
-    background-color: #0056b3;
+@keyframes flashAnimation {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
 }
 
-
-.btn-delete {
-    background-color: #dc3545;
-    border: none;
-    cursor: pointer;
-    padding: 5px 10px;
-    font-size: 14px;
-    border-radius: 3px;
-}
-
-.btn-delete:hover {
-    background-color: #c82333;
+/* Footer */
+footer {
+    margin-top: 20px;
+    font-size: 0.9em;
+    color: #f39c12; /* Gold footer text */
 }
