@@ -1,5 +1,4 @@
 ### + dokumentacija (spomenut probleme klasičnih oblika prijave prisutnosti (sporo, fake prijave/potpisi...)
-### provat dodat neke unit testove
 ### popravit dizajn na nekima stvarima
 # Face Recognition Attendance System
 
