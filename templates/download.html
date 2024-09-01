@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download Attendance</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <h1>Your attendance data is ready</h1>
+    <!-- Button to open Gmail -->
+    <p><a href="{{ url_for('download_attendance') }}">Download Attendance CSV</a></p>
+    <button onclick="openGmail()">Open Gmail</button>
+
+    <script>
+        function openGmail() {
+            let userEmail = "{{ user_email }}";
+            let gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(userEmail)}`;
+            window.open(gmailUrl, '_blank');
+        }
+    </script>
+</body>
+</html>
