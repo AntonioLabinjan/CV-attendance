@@ -101,3 +101,37 @@ footer {
     font-size: 0.9em;
     color: #f39c12; /* Gold footer text */
 }
+
+/* Navigation Styling */
+nav ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: flex; /* Use flexbox to align items in a row */
+    justify-content: center; /* Center the items horizontally */
+    flex-wrap: wrap; /* Allow wrapping to a new line if needed */
+    gap: 10px; /* Add space between items */
+}
+
+nav ul li {
+    margin: 0; /* Reset margin for list items */
+    padding: 0; /* Reset padding for list items */
+}
+
+nav ul li a {
+    display: inline-block;
+    padding: 8px 12px;
+    background-color: #f39c12; /* Gold background */
+    color: #222; /* Dark text color */
+    border-radius: 5px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    font-size: 0.9em; /* Slightly smaller font size */
+    text-transform: uppercase; /* Make text uppercase for consistency */
+    text-align: center; /* Center text inside the button */
+    min-width: 120px; /* Set a minimum width to align buttons */
+}
+
+nav ul li a:hover {
+    background-color: #e67e22; /* Darker orange on hover */
+    transform: scale(1.05); /* Slightly enlarge the button on hover */
+}
