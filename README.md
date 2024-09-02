@@ -2,7 +2,7 @@
 ### popravit dizajn na nekima stvarima
 ### napravit UML dijagrame (use case/class itd.)
 # Face Recognition Attendance System
-
+# recovery code: XYWZZG4535Y3ELMJJL6TRRVM
 Test credentials:
 Email: alabinjan6@gmail.com
 Username: Antonio
