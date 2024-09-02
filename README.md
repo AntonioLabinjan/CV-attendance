@@ -1,5 +1,6 @@
 ### + dokumentacija (spomenut probleme klasičnih oblika prijave prisutnosti (sporo, fake prijave/potpisi...)
 ### popravit dizajn na nekima stvarima
+### napravit UML dijagrame (use case/class itd.)
 # Face Recognition Attendance System
 
 Test credentials:
