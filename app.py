@@ -37,10 +37,11 @@ login_manager.login_view = 'login'
 
 # User model
 class User(UserMixin):
-    def __init__(self, id, username, password):
+    def __init__(self, id, username, password, email):
         self.id = id
         self.username = username
         self.password = password
+        self.email = email  # Add email attribute
 
 # In-memory user storage (can be replaced with a database)
 users = {}
@@ -48,6 +49,22 @@ users = {}
 @login_manager.user_loader
 def load_user(user_id):
     return users.get(int(user_id))
+
+from flask_mail import Mail, Message
+
+# Add this below your existing imports
+mail = Mail()
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'alabinjan6@gmail.com'  # Replace with your actual email
+app.config['MAIL_PASSWORD'] = '4uGnsUh9'  # Replace with your actual email password
+app.config['MAIL_DEFAULT_SENDER'] = 'alabinjan6@gmail.com'  # Sender address
+
+mail.init_app(app)
+
+
 
 # Function to add a known face
 def add_known_face(image_path, name):
@@ -138,6 +155,7 @@ def signup():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        user_email = request.form['email']
 
         # Check if the username is already taken
         if any(user.username == username for user in users.values()):
@@ -155,7 +173,8 @@ def signup():
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
 
         user_id = len(users) + 1
-        new_user = User(user_id, username, hashed_password)
+        new_user = User(user_id, username, hashed_password, user_email)
+
         users[user_id] = new_user
 
         flash("Signup successful! Please log in.")
@@ -235,6 +254,29 @@ def add_student():
 def add_student_success():
     return render_template('add_student_success.html')
 
+import os
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+
+def send_attendance_notification(name, date, time, subject):
+    message = Mail(
+        from_email='alabinjan6@gmail.com', 
+        to_emails='antoniolabinjan5@gmail.com', # napravit neki official mail za ovaj app da ne koristin svoj stari mail
+        subject=f'Attendance Logged for {name}',
+        plain_text_content=f'Attendance for {name} in {subject} on {date} at {time} was successfully logged.'
+    )
+    
+    try:
+        print("Attempting to send email...")
+        sg = SendGridAPIClient('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')
+        response = sg.send(message)
+        print(f"Email sent: {response.status_code}")
+        print(f"Response body: {response.body}")  # This line helps to check the response body for errors.
+    except Exception as e:
+        print(f"Error sending email: {str(e)}")
+
+
+
 def log_attendance(name, frame):
     global current_subject, attendance_date, start_time, end_time
     if current_subject is None or not is_within_time_interval():
@@ -273,7 +315,14 @@ def log_attendance(name, frame):
 
     print(f"Logged attendance for {name} on {date} at {time} for subject {current_subject}.")
 
+
+    send_attendance_notification(name, date, time, current_subject)
+
     return frame
+
+
+
+
 
 def generate_frames():
     while True:
