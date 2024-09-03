@@ -77,7 +77,7 @@ app.config['MAIL_USERNAME'] = 'attendance.logged@gmail.com'  # Replace with your
 app.config['MAIL_PASSWORD'] = 'ATTENDANCE/2025'  # Replace with your actual email password
 app.config['MAIL_DEFAULT_SENDER'] = 'attendance.logged@gmail.com'  # Sender address
 
-mail.init_app(app)
+mail = Mail(app)
 
 
 
