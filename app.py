@@ -12,6 +12,23 @@ from datetime import datetime, timedelta
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import requests
+from werkzeug.security import generate_password_hash, check_password_hash
+import re
+from flask import flash
+from flask_mail import Mail, Message
+import os
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+import matplotlib.pyplot as plt
+import seaborn as sns
+from flask import send_file
+import io
+from collections import Counter 
+import base64
+import io
+
+
+
 
 # Initialize CLIP model and processor
 model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
@@ -49,8 +66,6 @@ users = {}
 @login_manager.user_loader
 def load_user(user_id):
     return users.get(int(user_id))
-
-from flask_mail import Mail, Message
 
 # Add this below your existing imports
 mail = Mail()
@@ -129,12 +144,6 @@ attendance_date = None
 start_time = None
 end_time = None
 
-from werkzeug.security import generate_password_hash, check_password_hash
-
-# Tu dodat neke checkove kad se kreira password (minimalna duljina, mora imat slova/brojeve/znakove itd.)
-
-import re
-from flask import flash
 
 # A helper function to validate the password
 def validate_password(password):
@@ -254,9 +263,6 @@ def add_student():
 def add_student_success():
     return render_template('add_student_success.html')
 
-import os
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
 
 def send_attendance_notification(name, date, time, subject):
     message = Mail(
@@ -557,11 +563,6 @@ def students():
 
     return render_template('students.html', students=students)
 
-import matplotlib.pyplot as plt
-import seaborn as sns
-from flask import send_file
-import io
-
 
 @app.route('/plot/student_attendance')
 def plot_student_attendance():
@@ -797,10 +798,6 @@ def report():
 
 
 # Ruta koja će dohvatit sva kašnjenja, s predmetima i entry timeon
-
-from collections import Counter 
-import base64
-import io
 
 @app.route('/late_analysis', methods=["GET", "POST"])
 @login_required
