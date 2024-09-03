@@ -58,9 +58,9 @@ mail = Mail()
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'alabinjan6@gmail.com'  # Replace with your actual email
-app.config['MAIL_PASSWORD'] = '4uGnsUh9'  # Replace with your actual email password
-app.config['MAIL_DEFAULT_SENDER'] = 'alabinjan6@gmail.com'  # Sender address
+app.config['MAIL_USERNAME'] = 'attendance.logged@gmail.com'  # Replace with your actual email
+app.config['MAIL_PASSWORD'] = 'ATTENDANCE/2025'  # Replace with your actual email password
+app.config['MAIL_DEFAULT_SENDER'] = 'attendance.logged@gmail.com'  # Sender address
 
 mail.init_app(app)
 
@@ -260,8 +260,8 @@ from sendgrid.helpers.mail import Mail
 
 def send_attendance_notification(name, date, time, subject):
     message = Mail(
-        from_email='alabinjan6@gmail.com', 
-        to_emails='antoniolabinjan5@gmail.com', # napravit neki official mail za ovaj app da ne koristin svoj stari mail
+        from_email='attendance.logged@gmail.com', 
+        to_emails='alabinjan6@gmail.com', # napravit neki official mail za ovaj app da ne koristin svoj stari mail
         subject=f'Attendance Logged for {name}',
         plain_text_content=f'Attendance for {name} in {subject} on {date} at {time} was successfully logged.'
     )
