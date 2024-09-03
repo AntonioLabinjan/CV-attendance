@@ -27,6 +27,24 @@ from collections import Counter
 import base64
 import io
 
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
+
+app = Flask(__name__)
+app.secret_key = os.getenv('SECRET_KEY')
+
+# Mail configuration
+app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
+app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT'))
+app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS') == 'True'
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+
+# SendGrid API Key
+sendgrid_api_key = os.getenv('SENDGRID_API_KEY')
 
 
 
@@ -42,9 +60,10 @@ known_face_names = []
 logged_names = set()
 
 app = Flask(__name__)
+app.secret_key = os.getenv('SECRET_KEY')
 
 # ovo bi bilo dobro spremit u .env fajl, ali to ću ben delat
-app.secret_key = 'DO_NOT_VISIT_GRMIALDA'
+#app.secret_key = 'DO_NOT_VISIT_GRMIALDA'
 
 
 # Flask-Login setup
@@ -69,6 +88,7 @@ def load_user(user_id):
 
 # Add this below your existing imports
 mail = Mail()
+
 
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
@@ -374,7 +394,7 @@ def video_feed():
 
 @app.route('/')
 def index():
-    api_key = "fe2e5f9339b2434db60124446241408"
+    api_key = os.getenv('WEATHER_API_KEY')
     location = "London" # Ili nešto drugo
     weather_condition = get_weather_forecast(api_key, location)
     
