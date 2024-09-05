@@ -880,7 +880,51 @@ def late_entries():
 
 
 
+from bs4 import BeautifulSoup
+import requests
 
+
+def scrape_github_profile(url):
+    try:
+        # Send an HTTP request to the GitHub profile page
+        response = requests.get(url)
+        response.raise_for_status()
+
+        # Parse the HTML content of the page
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        # Extract the name of the user
+        name = soup.find('span', class_='p-name').text.strip()
+
+        # Extract the bio (if available)
+        bio = soup.find('div', class_='p-note user-profile-bio mb-3 js-user-profile-bio f4').text.strip() if soup.find('div', class_='p-note user-profile-bio mb-3 js-user-profile-bio f4') else 'No bio available'
+
+        # Extract number of followers
+        followers = soup.find('span', class_='text-bold').text.strip()
+
+        return {
+            'name': name,
+            'bio': bio,
+            'followers': followers,
+        }
+    except Exception as e:
+        print(f"Error scraping the website: {e}")
+        return None
+
+# Route to display the GitHub profile data in HTML template
+@app.route('/scrape-github-profile', methods=['GET'])
+def scrape_github_profile_route():
+    # GitHub profile URL to scrape
+    url = 'https://github.com/AntonioLabinjan'
+    
+    # Scrape GitHub profile info from the URL
+    data = scrape_github_profile(url)
+
+    if data:
+        # Render the scraped data in the HTML template
+        return render_template('profile.html', name=data['name'], bio=data['bio'], followers=data['followers'])
+    else:
+        return jsonify({'error': 'Failed to scrape the data'}), 500
 
 '''
 Run the flask app on port 5144
