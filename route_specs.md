@@ -398,3 +398,74 @@
   - Sends a JSON response back to the client, indicating whether the email was sent successfully or if there was an error.
 - **Edge Cases:**
   - Handles cases where no email is provided or if the email sending fails, ensuring appropriate error messages are returned in the JSON response.
+  - 
+  ### Specification for `/scrape-github-profile` Route
+
+#### Route Overview:
+- **Route Name**: `/scrape-github-profile`
+- **HTTP Method**: `GET`
+- **Function Name**: `scrape_github_profile_route()`
+- **Description**: This route is responsible for scraping profile information from a specific GitHub profile page and rendering that data on a predefined HTML template or returning an error message if scraping fails.
+
+---
+
+### Specifications:
+
+1. **Request Method**: `GET`
+   - This route accepts HTTP GET requests and does not require any query parameters or payload.
+
+2. **GitHub Profile URL**: 
+   - The GitHub profile being scraped is hardcoded as `https://github.com/AntonioLabinjan`.
+   - In future extensions, the URL could be passed as a parameter to make the route more dynamic.
+
+3. **Scraping Logic**:
+   - The `scrape_github_profile(url)` function is called to scrape the GitHub profile information.
+   - The function should return a dictionary with the following keys:
+     - `name`: GitHub user's full name.
+     - `bio`: GitHub user's bio.
+     - `followers`: GitHub user's follower count.
+   - If the scraping operation fails (returns `None` or an empty dictionary), a JSON response with an error message will be returned.
+
+4. **Response - Successful Scraping**:
+   - If the scraping is successful, the following information is passed to the HTML template (`profile.html`):
+     - `name`: The GitHub user's full name.
+     - `bio`: The GitHub user's bio.
+     - `followers`: The GitHub user's follower count.
+   - The HTML template will render the scraped data for display.
+
+5. **Response - Failed Scraping**:
+   - If scraping fails, the route will return a JSON response with an error message and a `500` HTTP status code:
+     ```json
+     {
+         "error": "Failed to scrape the data"
+     }
+     ```
+
+6. **HTML Template (`profile.html`)**:
+   - The HTML template will dynamically display the scraped data using the following variables:
+     - `{{ name }}`: GitHub user's name.
+     - `{{ bio }}`: GitHub user's bio.
+     - `{{ followers }}`: Number of followers.
+
+---
+
+### Example Response Flow:
+
+1. **Successful Scraping**:
+   - User sends a GET request to `/scrape-github-profile`.
+   - The server successfully scrapes the GitHub profile and renders the following in `profile.html`:
+     ```html
+     <h1>{{ name }}</h1>
+     <p>{{ bio }}</p>
+     <p>Followers: {{ followers }}</p>
+     ```
+
+2. **Failed Scraping**:
+   - User sends a GET request to `/scrape-github-profile`.
+   - The server fails to scrape the profile and returns a JSON error:
+     ```json
+     {
+         "error": "Failed to scrape the data"
+     }
+     ```
+   - Response HTTP status code: `500`.
