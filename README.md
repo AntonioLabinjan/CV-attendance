@@ -1,6 +1,6 @@
 ### + dokumentacija (spomenut probleme klasičnih oblika prijave prisutnosti (sporo, fake prijave/potpisi...)
 ### popravit dizajn na nekima stvarima
-### napravit UML dijagrame (use case/class itd.)
+### napravit UML dijagrame (class)
 # Face Recognition Attendance System
 
 ## Napravit 2 nova gmail accounta; 1 za sendera, 1 za recievera; da ne koristin svoje privatne mailove za ovo
@@ -66,4 +66,5 @@ The database will be automatically created on the first run. Ensure attendance.d
 Place student images in the known_faces directory, organized by student folders.
 
 
-
+Video demo: 
+https://youtu.be/bh1wrMPy-d0
