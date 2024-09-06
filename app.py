@@ -882,6 +882,8 @@ def late_entries():
 
 from bs4 import BeautifulSoup
 import requests
+import pdfplumber
+from flask import render_template_string
 
 
 def scrape_github_profile(url):
@@ -912,19 +914,91 @@ def scrape_github_profile(url):
         return None
 
 # Route to display the GitHub profile data in HTML template
-@app.route('/scrape-github-profile', methods=['GET'])
-def scrape_github_profile_route():
-    # GitHub profile URL to scrape
-    url = 'https://github.com/AntonioLabinjan'
-    
-    # Scrape GitHub profile info from the URL
-    data = scrape_github_profile(url)
-
-    if data:
-        # Render the scraped data in the HTML template
-        return render_template('profile.html', name=data['name'], bio=data['bio'], followers=data['followers'])
+def extract_pdf_text(pdf_url):
+    response = requests.get(pdf_url, verify=False)
+    if response.status_code == 200:
+        with open("calendar.pdf", "wb") as f:
+            f.write(response.content)
+        
+        # Extract text from the PDF using pdfplumber
+        text_content = ""
+        with pdfplumber.open("calendar.pdf") as pdf:
+            for page in pdf.pages:
+                text_content += page.extract_text() + "\n"
+        return text_content
     else:
-        return jsonify({'error': 'Failed to scrape the data'}), 500
+        return "Failed to retrieve PDF."
+
+# Function to filter only non-working days
+def get_non_working_days(text):
+    # Define keywords that indicate non-working days
+    keywords = [
+        "Blagdan", "Praznik", "nenastavni", "odmor", "Božić", "Nova Godina", 
+        "Tijelovo", "Dan sjećanja", "Uskrs", "Svi sveti", "Sveta tri kralja", 
+        "Dan državnosti", "Velike Gospe", "Dan domovinske zahvalnosti"
+    ]
+    
+    # Use regular expression to capture dates with these keywords
+    non_working_days = []
+    for line in text.split("\n"):
+        if any(keyword in line for keyword in keywords):
+            non_working_days.append(line.strip())
+    
+    return "\n".join(non_working_days)
+
+# Flask route to display the filtered non-working days
+@app.route("/calendar")
+def show_calendar():
+    pdf_url = "https://www.unipu.hr/_download/repository/Sveu%C4%8Dili%C5%A1ni%20kalendar%20za%202024._2025..pdf"
+    calendar_text = extract_pdf_text(pdf_url)
+    non_working_days = get_non_working_days(calendar_text)
+    
+    # Render the filtered non-working days on a simple HTML page
+    html_content = f"""
+    <html>
+        <head>
+            <title>Non-Working Days 2024/2025</title>
+            <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                    margin: 40px;
+                    background-color: #f0f0f0;
+                    color: #333;
+                }}
+                h1 {{
+                    text-align: center;
+                    color: #0056b3;
+                }}
+                pre {{
+                    background-color: #ffffff;
+                    padding: 20px;
+                    border-radius: 8px;
+                    border: 1px solid #ddd;
+                    white-space: pre-wrap;
+                    line-height: 1.6;
+                    font-size: 14px;
+                    overflow-x: auto;
+                }}
+                .container {{
+                    max-width: 900px;
+                    margin: 0 auto;
+                    padding: 20px;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                    background-color: #ffffff;
+                    border-radius: 8px;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>Non-Working Days 2024/2025</h1>
+                <pre>{non_working_days}</pre>
+            </div>
+        </body>
+    </html>
+    """
+    return render_template_string(html_content)
+
 
 '''
 Run the flask app on port 5144
