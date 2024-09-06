@@ -120,7 +120,6 @@ pyttsx3==2.90
 pytube==15.0.0
 pytweening==1.2.0
 pytz==2024.1
-pywin32==306
 pywin32-ctypes==0.2.2
 PyYAML==6.0.1
 regex==2024.5.15
