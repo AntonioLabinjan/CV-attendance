@@ -913,6 +913,23 @@ def scrape_github_profile(url):
         print(f"Error scraping the website: {e}")
         return None
 
+@app.route('/scrape_github', methods=['GET'])
+def github_profile():
+    # Get the GitHub profile URL from the request arguments
+    url = 'https://github.com/AntonioLabinjan'
+    
+    if not url:
+        return jsonify({"error": "Please provide a GitHub profile URL"}), 400
+    
+    # Call the scrape function
+    profile_info = scrape_github_profile(url)
+    
+    if profile_info:
+        return jsonify(profile_info), 200
+    else:
+        return jsonify({"error": "Failed to scrape the GitHub profile"}), 500
+
+
 # Route to display the GitHub profile data in HTML template
 def extract_pdf_text(pdf_url):
     response = requests.get(pdf_url, verify=False)
