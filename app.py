@@ -970,7 +970,10 @@ def show_calendar():
     calendar_text = extract_pdf_text(pdf_url)
     non_working_days = get_non_working_days(calendar_text)
     
-    # Render the filtered non-working days on a simple HTML page
+    # Split the non-working days into a list for the HTML unordered list
+    non_working_days_list = non_working_days.split("\n")
+
+    # Render the filtered non-working days as a list with bullet points
     html_content = f"""
     <html>
         <head>
@@ -986,15 +989,17 @@ def show_calendar():
                     text-align: center;
                     color: #0056b3;
                 }}
-                pre {{
+                ul {{
                     background-color: #ffffff;
                     padding: 20px;
                     border-radius: 8px;
                     border: 1px solid #ddd;
-                    white-space: pre-wrap;
                     line-height: 1.6;
                     font-size: 14px;
-                    overflow-x: auto;
+                    list-style-type: disc;
+                }}
+                ul li {{
+                    margin-bottom: 10px;
                 }}
                 .container {{
                     max-width: 900px;
@@ -1009,7 +1014,9 @@ def show_calendar():
         <body>
             <div class="container">
                 <h1>Non-Working Days 2024/2025</h1>
-                <pre>{non_working_days}</pre>
+                <ul>
+                    {''.join(f"<li>{day}</li>" for day in non_working_days_list if day.strip())}
+                </ul>
             </div>
         </body>
     </html>
