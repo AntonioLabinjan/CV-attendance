@@ -883,7 +883,8 @@ def late_entries():
 from bs4 import BeautifulSoup
 import requests
 import pdfplumber
-from flask import render_template_string
+from flask import render_template_string, jsonify
+
 
 
 def scrape_github_profile(url):
@@ -915,19 +916,68 @@ def scrape_github_profile(url):
 
 @app.route('/scrape_github', methods=['GET'])
 def github_profile():
-    # Get the GitHub profile URL from the request arguments
+    # GitHub profile URL to scrape
     url = 'https://github.com/AntonioLabinjan'
     
     if not url:
         return jsonify({"error": "Please provide a GitHub profile URL"}), 400
     
-    # Call the scrape function
+    # Scrape the profile
     profile_info = scrape_github_profile(url)
     
     if profile_info:
-        return jsonify(profile_info), 200
+        # Render profile info using an HTML template
+        html_content = f"""
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>GitHub Profile</title>
+            <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                    background-color: #f0f0f0;
+                    color: #333;
+                    margin: 0;
+                    padding: 0;
+                }}
+                .container {{
+                    max-width: 800px;
+                    margin: 50px auto;
+                    padding: 20px;
+                    background-color: #fff;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                    text-align: center;
+                }}
+                h1 {{
+                    color: #0056b3;
+                }}
+                p {{
+                    font-size: 18px;
+                    line-height: 1.6;
+                }}
+                .followers {{
+                    font-weight: bold;
+                    color: #333;
+                    font-size: 20px;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>{profile_info['name']}</h1>
+                <p><strong>Bio:</strong> {profile_info['bio']}</p>
+                <p class="followers">Followers: {profile_info['followers']}</p>
+            </div>
+        </body>
+        </html>
+        """
+        return render_template_string(html_content), 200
     else:
         return jsonify({"error": "Failed to scrape the GitHub profile"}), 500
+
 
 
 # Route to display the GitHub profile data in HTML template
@@ -963,6 +1013,7 @@ def get_non_working_days(text):
     
     return "\n".join(non_working_days)
 
+# Flask route to display the filtered non-working days
 # Flask route to display the filtered non-working days
 @app.route("/calendar")
 def show_calendar():
@@ -1022,6 +1073,7 @@ def show_calendar():
     </html>
     """
     return render_template_string(html_content)
+
 
 
 '''
