@@ -469,3 +469,80 @@
      }
      ```
    - Response HTTP status code: `500`.
+  
+
+Here's a detailed route specification based on the `show_calendar` route that filters and displays non-working days from a PDF in a rendered HTML template:
+
+---
+
+### Route: `/calendar`
+
+**HTTP Method**: `GET`
+
+**Description**: 
+- This route fetches a PDF from a specified URL (University calendar), extracts its text, filters non-working days based on specific keywords, and then displays these days in an HTML template. The days are displayed as an unordered list in a styled web page.
+
+**Input**:
+- **URL**: `/calendar`
+- No user input required.
+
+**Processes**:
+1. **PDF Fetching**:
+   - The route retrieves the PDF from the given URL using `requests.get()` with SSL verification disabled (`verify=False`).
+   - The PDF is saved locally (`calendar.pdf`) for temporary extraction.
+
+2. **PDF Text Extraction**:
+   - Using `pdfplumber`, the PDF text is extracted page by page. The entire content of the PDF is stored as a single string.
+
+3. **Keyword Filtering**:
+   - The extracted text is scanned for specific non-working day keywords (such as public holidays and university off-days).
+   - Lines containing any of these keywords are filtered and stored as the list of non-working days.
+
+4. **HTML Rendering**:
+   - The filtered non-working days are passed into an HTML template and displayed as an unordered list (`<ul>`). 
+   - The HTML template is inline with simple styling for better visual presentation.
+
+**Output**:
+- A rendered HTML page listing the non-working days for the 2024/2025 academic year in a bullet-point format.
+
+---
+
+### Functions Used:
+
+#### 1. `extract_pdf_text(pdf_url)`
+- **Description**: Downloads the PDF, saves it locally, and extracts its textual content using `pdfplumber`.
+- **Input**: 
+  - `pdf_url`: The URL of the PDF file to be fetched.
+- **Output**: The extracted text as a single string.
+
+#### 2. `get_non_working_days(text)`
+- **Description**: Filters the extracted text and identifies lines containing keywords that signify non-working days.
+- **Input**: 
+  - `text`: The full text extracted from the PDF.
+- **Output**: A string containing non-working day descriptions, separated by newlines.
+
+---
+
+### Key Elements in the HTML Output:
+
+- **Page Title**: "Non-Working Days 2024/2025"
+- **Styled Container**: A center-aligned container with box-shadow and padding for the list of non-working days.
+- **Unordered List**: The list of non-working days is displayed as `<li>` elements under an unordered list (`<ul>`).
+
+---
+
+### Example Output:
+#### GET `/calendar`
+
+A webpage with a header "Non-Working Days 2024/2025" and a list like:
+
+```
+- Božić (25.12.2024)
+- Nova Godina (01.01.2025)
+- Dan državnosti (25.06.2025)
+- Uskrs (06.04.2025)
+```
+
+---
+
+This route provides a functional way to convert PDF-based calendar information into a clean, readable web format for users to easily access.
