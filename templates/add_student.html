@@ -1,11 +1,97 @@
 {% extends 'layout.html' %}
 {% block content %}
 <h1>Add a New Student</h1>
+
+<style>
+    #drop-zone {
+        border: 2px dashed #ccc;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 20px;
+        background-color: #f9f9f9;
+    }
+
+    #drop-zone.dragover {
+        background-color: #e3e3e3;
+    }
+</style>
+
 <form method="post" action="{{ url_for('add_student') }}" enctype="multipart/form-data">
     <label for="name">Student Name:</label>
     <input type="text" id="name" name="name" required>
+    
     <label for="images">Upload Images:</label>
-    <input type="file" id="images" name="images" multiple required>
+    <div id="drop-zone">
+        Drag and drop images here or click to upload
+    </div>
+    <input type="file" id="images" name="images" multiple required style="display:none;">
+    
+    <ul id="file-list"></ul>
+
     <button type="submit">Add Student</button>
 </form>
+
+<script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('images');
+    const fileList = document.getElementById('file-list');
+
+    const dataTransfer = new DataTransfer();
+
+    dropZone.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', (event) => {
+        const files = event.target.files;
+        addFiles(files);
+        event.target.value = '';
+    });
+
+    dropZone.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (event) => {
+        event.preventDefault();
+        dropZone.classList.remove('dragover');
+        const files = event.dataTransfer.files;
+        addFiles(files);
+    });
+
+    function addFiles(files) {
+        for (let i = 0; i < files.length; i++) {
+            if (!fileExists(files[i])) {
+                dataTransfer.items.add(files[i]);
+                displayFile(files[i]);
+            }
+        }
+        fileInput.files = dataTransfer.files;
+    }
+
+    function fileExists(file) {
+        for (let i = 0; i < dataTransfer.items.length; i++) {
+            const existingFile = dataTransfer.items[i].getAsFile();
+            if (
+                existingFile.name === file.name &&
+                existingFile.size === file.size &&
+                existingFile.lastModified === file.lastModified
+            ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function displayFile(file) {
+        const li = document.createElement('li');
+        li.textContent = file.name;
+        fileList.appendChild(li);
+    }
+</script>
 {% endblock %}
