@@ -1,4 +1,4 @@
-# Ovo je totalni chatGPT :)
+# Ovo je poprilični chatGPT :)
 
 ### Specification for `/set_subject` Route
 
