@@ -1,5 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'layout.html' %}
+{% block content %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,21 +11,29 @@
     </style>
 </head>
 <body>
-    {% for subject in report %}
-        <h1>{{ subject.subject }} - Total Lectures: {{ subject.total_lectures }}</h1>
-        <ul>
-            <li><strong>Student</strong> - <strong>Attended</strong> - <strong>Attendance %</strong> - <strong>Status</strong></li>
-            {% for student in subject.students %}
-                <li>{{ student.name }} - Attended: {{ student.attended_lectures }} - Attendance: {{ student.attendance_percentage|round(2) }}% 
-                    - {% if student.meets_requirement %}
-                        <span class="met">&#10004;</span> <!-- Green Checkmark -->
-                      {% else %}
-                        <span class="not-met">&#10008;</span> <!-- Red X Sign -->
-                      {% endif %}
-                </li>
-            {% endfor %}
-        </ul>
-        <hr>
-    {% endfor %}
+    <div class="container">
+        <!-- Loop through each subject in the report -->
+        {% for subject in report %}
+            <h1>{{ subject.subject }} - Total Lectures: {{ subject.total_lectures }}</h1>
+            <p class="average-attendance">Average Attendance: {{ subject.average_attendance|round(2) }}%</p>
+
+            <!-- Table for attendance details -->
+            <ul>
+                <li><strong>Student</strong> - <strong>Attended</strong> - <strong>Attendance %</strong> - <strong>Status</strong></li>
+                {% for student in subject.students %}
+                    <li>
+                        {{ student.name }} - Attended: {{ student.attended_lectures }} 
+                        - Attendance: {{ student.attendance_percentage|round(2) }}% 
+                        - {% if student.meets_requirement %}
+                            <span class="met">&#10004; Met</span>
+                        {% else %}
+                            <span class="not-met">&#10008; Not Met</span>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+            <hr>
+        {% endfor %}
+    </div>
 </body>
-</html>
+{% endblock %}
