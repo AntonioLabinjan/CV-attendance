@@ -779,41 +779,50 @@ def report():
     for subject in subjects:
         subject_name = subject['subject']
 
-        # Count the total number of lectures for the subject
+        # Count total lectures
         cur.execute('SELECT COUNT(DISTINCT date) as total_lectures FROM attendance WHERE subject = ?', (subject_name,))
         total_lectures = cur.fetchone()['total_lectures']
 
-        # Count the number of lectures attended by each student for this subject
-        cur.execute('''SELECT name, COUNT(*) as attended_lectures 
+        # Fetch student attendance and ranking
+        cur.execute('''SELECT name, COUNT(*) as attended_lectures, 
+                       (COUNT(*) * 100.0 / ?) as attendance_percentage 
                        FROM attendance 
                        WHERE subject = ? 
-                       GROUP BY name''', 
-                    (subject_name,))
+                       GROUP BY name 
+                       ORDER BY attendance_percentage DESC''', 
+                   (total_lectures, subject_name))
         students_attendance = cur.fetchall()
 
-        # Add percentage calculation and requirement check for each student
         students_with_status = []
         for student in students_attendance:
-            attendance_percentage = (student['attended_lectures'] / total_lectures) * 100
-            meets_requirement = attendance_percentage >= 50
+            meets_requirement = student['attendance_percentage'] >= 50
             students_with_status.append({
                 'name': student['name'],
                 'attended_lectures': student['attended_lectures'],
-                'attendance_percentage': attendance_percentage,
+                'attendance_percentage': student['attendance_percentage'],
                 'meets_requirement': meets_requirement
             })
 
-        # Prepare the report for this subject
+        # Average attendance
+        cur.execute('''SELECT AVG(attendance_percentage) as avg_attendance 
+                       FROM (SELECT COUNT(*) * 100.0 / ? as attendance_percentage 
+                             FROM attendance 
+                             WHERE subject = ? 
+                             GROUP BY name)''', 
+                   (total_lectures, subject_name))
+        avg_attendance = cur.fetchone()['avg_attendance']
+
+        # Prepare report
         report.append({
             'subject': subject_name,
             'total_lectures': total_lectures,
+            'average_attendance': avg_attendance,
             'students': students_with_status
         })
 
     # Close the connection
     conn.close()
 
-    # Render the report using the HTML template
     return render_template('attendance_report.html', report=report)
 
 
