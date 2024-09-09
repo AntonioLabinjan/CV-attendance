@@ -47,37 +47,30 @@ app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 sendgrid_api_key = os.getenv('SENDGRID_API_KEY')
 
 
-
-# Initialize CLIP model and processor
 model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
 processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
 
-# In-memory storage for known face embeddings and their labels
 known_face_encodings = []
 known_face_names = []
 
-# Track attendance for the current session
 logged_names = set()
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
 
-# ovo bi bilo dobro spremit u .env fajl, ali to ću ben delat
+# ovo bi bilo dobro spremit u .env fajl, ali to ću ben delat (riješeno)
 #app.secret_key = 'DO_NOT_VISIT_GRMIALDA'
 
-
-# Flask-Login setup
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-# User model
 class User(UserMixin):
     def __init__(self, id, username, password, email):
         self.id = id
         self.username = username
         self.password = password
-        self.email = email  # Add email attribute
+        self.email = email  
 
 # In-memory user storage (can be replaced with a database)
 users = {}
@@ -86,7 +79,6 @@ users = {}
 def load_user(user_id):
     return users.get(int(user_id))
 
-# Add this below your existing imports
 mail = Mail()
 
 
@@ -99,9 +91,6 @@ app.config['MAIL_DEFAULT_SENDER'] = 'attendance.logged@gmail.com'  # Sender addr
 
 mail = Mail(app)
 
-
-
-# Function to add a known face
 def add_known_face(image_path, name):
     image = cv2.imread(image_path)
     if image is None:
@@ -115,7 +104,6 @@ def add_known_face(image_path, name):
     known_face_names.append(name)
     print(f"Added face for {name} from {image_path}")
 
-# Load all known faces from the 'known_faces' directory
 def load_known_faces():
     for student_name in os.listdir('known_faces'):
         student_dir = os.path.join('known_faces', student_name)
@@ -127,17 +115,13 @@ def load_known_faces():
                 except ValueError as e:
                     print(e)
 
-    # Debugging output
     print(f"Loaded {len(known_face_encodings)} known face encodings")
     print(f"Known face names: {known_face_names}")
 
-# Load known faces at startup
 load_known_faces()
 
-# Initialize the webcam
 video_capture = cv2.VideoCapture(0)
 
-# Face detection using Haar Cascade
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
 def create_db():
@@ -158,7 +142,6 @@ def create_db():
 
 create_db()
 
-# Initialize current subject details
 current_subject = None
 attendance_date = None
 start_time = None
@@ -264,7 +247,7 @@ def add_student():
         name = request.form['name']
         images = request.files.getlist('images')
         
-        # Create a new subfolder in the known_faces directory
+        # new subfolder for each new student
         student_dir = os.path.join('known_faces', name)
         os.makedirs(student_dir, exist_ok=True)
 
@@ -278,7 +261,6 @@ def add_student():
 
     return render_template('add_student.html')
 
-# Add student success route
 @app.route('/add_student_success')
 def add_student_success():
     return render_template('add_student_success.html')
@@ -287,7 +269,7 @@ def add_student_success():
 def send_attendance_notification(name, date, time, subject):
     message = Mail(
         from_email='attendance.logged@gmail.com', 
-        to_emails='alabinjan6@gmail.com', # napravit neki official mail za ovaj app da ne koristin svoj stari mail
+        to_emails='alabinjan6@gmail.com', # napravit neki official mail za ovaj app da ne koristin svoj mail
         subject=f'Attendance Logged for {name}',
         plain_text_content=f'Attendance for {name} in {subject} on {date} at {time} was successfully logged.'
     )
@@ -313,10 +295,9 @@ def log_attendance(name, frame):
     date = now.strftime("%Y-%m-%d")
     time = now.strftime("%H:%M:%S")
 
-    # Create datetime object for start time
     start_time_obj = datetime.strptime(f"{attendance_date} {start_time}", "%Y-%m-%d %H:%M")
 
-    # Calculate the late threshold time
+    # Tolerate up to 14 minute lateness (15 or more is considered late)
     late_time_obj = start_time_obj + timedelta(minutes=14)
 
     # Check if the current time is late
@@ -333,7 +314,6 @@ def log_attendance(name, frame):
         print(f"Attendance for {name} on {date} for subject {current_subject} is already logged.")
         return frame
 
-    # Insert the new attendance record
     c.execute("INSERT INTO attendance (name, date, time, subject, late) VALUES (?, ?, ?, ?, ?)", 
               (name, date, time, current_subject, 1 if now > late_time_obj else 0))
     conn.commit()
@@ -379,7 +359,6 @@ def generate_frames():
                     name = known_face_names[min_distance_index]
                     frame = log_attendance(name, frame)  # Log attendance with overlay if late
 
-            # Draw a rectangle around the face and label it
             cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
             cv2.putText(frame, name, (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
 
@@ -395,7 +374,7 @@ def video_feed():
 @app.route('/')
 def index():
     api_key = os.getenv('WEATHER_API_KEY')
-    location = "London" # Ili nešto drugo
+    location = "London" # Tu more bilo koji grad
     weather_condition = get_weather_forecast(api_key, location)
     
     if predict_absence_due_to_weather(weather_condition):
@@ -408,7 +387,7 @@ def index():
 @app.route('/attendance', methods=['GET'])
 @login_required
 def attendance():
-    # Get filter parameters from the query string
+    # Get filter params from query string
     name_filter = request.args.get('name')
     subject_filter = request.args.get('subject')
     date_filter = request.args.get('date')
@@ -420,7 +399,7 @@ def attendance():
     conn = sqlite3.connect('attendance.db')
     c = conn.cursor()
 
-    # Build the SQL query dynamically based on the provided filters
+    # dynamical query
     query = "SELECT rowid, subject, name, date, time, late FROM attendance WHERE 1=1"
     params = []
 
@@ -479,14 +458,11 @@ def download_attendance():
     records = c.fetchall()
     conn.close()
 
-    # Create a string buffer to write CSV data
     output = io.StringIO()
     writer = csv.writer(output)
     
     # Initialize previous subject to keep track of subject changes
     previous_subject = None
-
-    # Write CSV headers
     writer.writerow(['Subject', 'Name', 'Date', 'Time'])
 
     # Write CSV data grouped by subject
@@ -495,13 +471,12 @@ def download_attendance():
         
         if subject != previous_subject:
             if previous_subject is not None:
-                writer.writerow([])  # Add an empty row for separation between subjects
-            writer.writerow([subject])  # Write the subject name as a new section header
+                writer.writerow([])  
+            writer.writerow([subject])  
             previous_subject = subject
         
         writer.writerow(['', name, date, time])
     
-    # Seek to the beginning of the stream
     output.seek(0)
     
     return Response(output, mimetype="text/csv", headers={"Content-Disposition": "attachment;filename=attendance.csv"})
@@ -515,32 +490,26 @@ def download_and_email_attendance():
     records = c.fetchall()
     conn.close()
 
-    # Create a string buffer to write CSV data
     output = io.StringIO()
     writer = csv.writer(output)
 
-    # Initialize previous subject to keep track of subject changes
     previous_subject = None
 
-    # Write CSV headers
     writer.writerow(['Subject', 'Name', 'Date', 'Time'])
 
-    # Write CSV data grouped by subject
     for record in records:
         subject, name, date, time = record
 
         if subject != previous_subject:
             if previous_subject is not None:
-                writer.writerow([])  # Add an empty row for separation between subjects
-            writer.writerow([subject])  # Write the subject name as a new section header
+                writer.writerow([])  
+            writer.writerow([subject])
             previous_subject = subject
 
         writer.writerow(['', name, date, time])
 
-    # Seek to the beginning of the stream
     output.seek(0)
 
-    # Prepare the CSV data
     csv_data = output.getvalue()
 
     # Assuming you have the user's email from the session or request
@@ -596,7 +565,6 @@ def plot_student_attendance():
     # Prepare data for plotting
     names, counts = zip(*data)
 
-    # Create the plot
     plt.figure(figsize=(10, 6))
     sns.barplot(x=counts, y=names, palette='viridis')
     plt.title('Attendance by Student')
@@ -622,7 +590,6 @@ def plot_subject_attendance():
     # Prepare data for plotting
     subjects, counts = zip(*data)
 
-    # Create the plot
     plt.figure(figsize=(8, 8))
     plt.pie(counts, labels=subjects, autopct='%1.1f%%', colors=sns.color_palette('pastel'))
     plt.title('Attendance by Subject')
@@ -640,20 +607,16 @@ def plot_monthly_attendance():
     conn = sqlite3.connect('attendance.db')
     c = conn.cursor()
 
-    # Adjust this query based on your actual schema. Assuming you want to group by date.
     c.execute("SELECT date, COUNT(*) as count FROM attendance GROUP BY date")
     data = c.fetchall()
     conn.close()
 
-    # Prepare data for plotting
     dates, counts = zip(*data)
 
-    # Create the plot
     plt.figure(figsize=(8, 8))
     plt.pie(counts, labels=dates, autopct='%1.1f%%', colors=sns.color_palette('pastel'))
     plt.title('Monthly Attendance Distribution')
 
-    # Save the plot to a BytesIO object and return it as a response
     img = io.BytesIO()
     plt.savefig(img, format='png')
     img.seek(0)
@@ -765,12 +728,10 @@ def edit_announcement(id):
 @app.route('/report')
 @login_required
 def report():
-    # Establish connection to the database
     conn = sqlite3.connect('attendance.db')
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
-
-    # Fetch all distinct subjects
+    
     cur.execute('SELECT DISTINCT subject FROM attendance')
     subjects = cur.fetchall()
 
@@ -779,11 +740,9 @@ def report():
     for subject in subjects:
         subject_name = subject['subject']
 
-        # Count total lectures
         cur.execute('SELECT COUNT(DISTINCT date) as total_lectures FROM attendance WHERE subject = ?', (subject_name,))
         total_lectures = cur.fetchone()['total_lectures']
 
-        # Fetch student attendance and ranking
         cur.execute('''SELECT name, COUNT(*) as attended_lectures, 
                        (COUNT(*) * 100.0 / ?) as attendance_percentage 
                        FROM attendance 
@@ -803,7 +762,7 @@ def report():
                 'meets_requirement': meets_requirement
             })
 
-        # Average attendance
+        # avg
         cur.execute('''SELECT AVG(attendance_percentage) as avg_attendance 
                        FROM (SELECT COUNT(*) * 100.0 / ? as attendance_percentage 
                              FROM attendance 
@@ -812,7 +771,6 @@ def report():
                    (total_lectures, subject_name))
         avg_attendance = cur.fetchone()['avg_attendance']
 
-        # Prepare report
         report.append({
             'subject': subject_name,
             'total_lectures': total_lectures,
@@ -820,7 +778,6 @@ def report():
             'students': students_with_status
         })
 
-    # Close the connection
     conn.close()
 
     return render_template('attendance_report.html', report=report)
@@ -844,31 +801,29 @@ def late_entries():
     weekday_counter = Counter()
 
     for entry in late_entries:
-        time_in = entry[2]  # Assuming the 'time' is the third column
-        date = entry[1]     # Assuming the 'date' is the second column
+        time_in = entry[2]  
+        date = entry[1]     
 
-        # Convert time and date to appropriate formats
+        # Convert time and date 
         time_obj = datetime.strptime(time_in, "%H:%M:%S")
         date_obj = datetime.strptime(date, "%Y-%m-%d")
         
-        # Count the hour
+        # Count hours
         hour_counter[time_obj.hour] += 1
         
         # Count the weekday (0=Monday, 6=Sunday)
         weekday_counter[date_obj.weekday()] += 1
 
-    # Convert results to lists for template rendering
     most_common_hour = hour_counter.most_common(1)[0] if hour_counter else None
     most_common_weekday = weekday_counter.most_common(1)[0] if weekday_counter else None
-
-    # Ensure all hours from 0 to 23 are represented
+    
     hours = list(range(24))
     hour_counts = [hour_counter.get(hour, 0) for hour in hours]  # Get count or 0 if not in the counter
 
     # Visualization
     if hour_counter:
         plt.bar(hours, hour_counts)
-        plt.xticks(hours)  # Ensure all hours are labeled on the x-axis
+        plt.xticks(hours) 
         plt.xlabel('Hour of the Day')
         plt.ylabel('Number of Late Entries')
         plt.title('Late Entries by Hour')
@@ -901,14 +856,13 @@ def scrape_github_profile(url):
         # Send an HTTP request to the GitHub profile page
         response = requests.get(url)
         response.raise_for_status()
-
         # Parse the HTML content of the page
         soup = BeautifulSoup(response.text, 'html.parser')
-
+        
         # Extract the name of the user
         name = soup.find('span', class_='p-name').text.strip()
 
-        # Extract the bio (if available)
+        # Extract the bio 
         bio = soup.find('div', class_='p-note user-profile-bio mb-3 js-user-profile-bio f4').text.strip() if soup.find('div', class_='p-note user-profile-bio mb-3 js-user-profile-bio f4') else 'No bio available'
 
         # Extract number of followers
@@ -925,17 +879,14 @@ def scrape_github_profile(url):
 
 @app.route('/scrape_github', methods=['GET'])
 def github_profile():
-    # GitHub profile URL to scrape
     url = 'https://github.com/AntonioLabinjan'
     
     if not url:
         return jsonify({"error": "Please provide a GitHub profile URL"}), 400
     
-    # Scrape the profile
     profile_info = scrape_github_profile(url)
     
     if profile_info:
-        # Render profile info using an HTML template
         html_content = f"""
         <!DOCTYPE html>
         <html lang="en">
@@ -989,7 +940,7 @@ def github_profile():
 
 
 
-# Route to display the GitHub profile data in HTML template
+# Route to display the calendar data in HTML template (look of this one should be improved a bit)
 def extract_pdf_text(pdf_url):
     response = requests.get(pdf_url, verify=False)
     if response.status_code == 200:
@@ -1013,8 +964,6 @@ def get_non_working_days(text):
         "Tijelovo", "Dan sjećanja", "Uskrs", "Svi sveti", "Sveta tri kralja", 
         "Dan državnosti", "Velike Gospe", "Dan domovinske zahvalnosti"
     ]
-    
-    # Use regular expression to capture dates with these keywords
     non_working_days = []
     for line in text.split("\n"):
         if any(keyword in line for keyword in keywords):
@@ -1022,7 +971,6 @@ def get_non_working_days(text):
     
     return "\n".join(non_working_days)
 
-# Flask route to display the filtered non-working days
 # Flask route to display the filtered non-working days
 @app.route("/calendar")
 def show_calendar():
