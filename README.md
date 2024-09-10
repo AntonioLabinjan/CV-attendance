@@ -1,6 +1,7 @@
 ### + dokumentacija (spomenut probleme klasičnih oblika prijave prisutnosti (sporo, fake prijave/potpisi...)
 ### popravit dizajn na nekima stvarima
 ### napravit UML dijagrame (class)
+### NAPOMENA: lokalni folder di sve ovo delan se zove WORKING_CV_ATTENDANCE (da ne zabin hehe)
 # Face Recognition Attendance System
 
 ## Napravit 2 nova gmail accounta; 1 za sendera, 1 za recievera; da ne koristin svoje privatne mailove za ovo
