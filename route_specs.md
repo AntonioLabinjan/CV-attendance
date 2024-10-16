@@ -1,5 +1,3 @@
-# Ovo je poprilični chatGPT :)
-
 ### Specification for `/set_subject` Route
 
 - **Supported Methods**: `GET`, `POST`
