@@ -1,5 +1,8 @@
 from imports import *
 
+from db_startup import create_db
+create_db()
+
 
 # Load-an stvari iz env fajla
 load_dotenv()
@@ -32,8 +35,6 @@ known_face_names = []
 # Track attendance for the current session
 logged_names = set()
 
-app = Flask(__name__)
-app.secret_key = os.getenv('SECRET_KEY')
 
 # ovo bi bilo dobro spremit u .env fajl, ali to ću ben delat
 #app.secret_key = 'DO_NOT_VISIT_GRMIALDA' # RIJEŠENO
@@ -143,34 +144,6 @@ video_capture = cv2.VideoCapture(0)
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
 
-
-def create_db():
-    conn = sqlite3.connect('attendance.db')
-    c = conn.cursor()
-
-    # Drop the attendance and announcements tables if they exist
-    c.execute('''DROP TABLE IF EXISTS attendance''')
-    c.execute('''CREATE TABLE IF NOT EXISTS attendance
-                 (name TEXT, date TEXT, time TEXT, subject TEXT, late BOOLEAN DEFAULT 0, UNIQUE(name, date, subject))''')
-
-    c.execute('''DROP TABLE IF EXISTS announcements''')
-    c.execute('''CREATE TABLE IF NOT EXISTS announcements
-                 (id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                  date_time TEXT, 
-                  teacher_name TEXT, 
-                  message TEXT)''')
-
-    # Create the users table for authentication
-    c.execute('''CREATE TABLE IF NOT EXISTS users
-                 (id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                  username TEXT UNIQUE, 
-                  password TEXT, 
-                  email TEXT UNIQUE)''')
-
-    conn.commit()
-    conn.close()
-
-create_db()
 
 
 # Inicijaliziranje atributa za trenutnu prisutnost
