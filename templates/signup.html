@@ -3,33 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up</title>
+    <title>Signup</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
-    <h2>Sign Up</h2>
-
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <ul class="flashes">
-                {% for message in messages %}
-                    <li>{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
-
+    <h2>Signup</h2>
     <form method="POST">
-        <label for="email">Email:</label>
-        <input type="text" name="email" required>
-        <br><br>
         <label for="username">Username:</label>
         <input type="text" name="username" required>
+        <br><br>
+        <label for="email">Email:</label>
+        <input type="email" name="email" required>
         <br><br>
         <label for="password">Password:</label>
         <input type="password" name="password" required>
         <br><br>
+        <label for="repeat_password">Repeat Password:</label>
+        <input type="password" name="repeat_password" required>
+        <br><br>
         <button type="submit">Sign Up</button>
     </form>
+
+    <!-- Flash message section -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul>
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
 </body>
 </html>
