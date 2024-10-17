@@ -45,18 +45,48 @@
             background-color: #004494;
             transform: translateY(0);
         }
+        .flash-messages {
+            margin: 10px 0;
+        }
+        .flash {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .flash.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .flash.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
     </style>
 {% endblock %}
 
 {% block content %}
-    <h1>Visualization Plots</h1>
+<h1>Visualization Plots</h1>
 
-    <div class="button-container">
-       <a href="/plot/student_attendance" class="route-button">Attendance per Student</a>
-       <hr>
-       <a href="/plot/subject_attendance" class="route-button">Attendance per Subject</a>
-       <hr>
-       <a href="/plot/monthly_attendance" class="route-button">Attendance per Month</a>
-        <!-- could add more buttons for more plots -->
-    </div>
+<!-- Flash message display for attendance-related messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <ul class="flash-messages">
+            {% set displayed = false %}
+            {% for category, message in messages %}
+                {% if category == 'attendance_warning' and not displayed %}
+                    <li class="flash {{ category }}">{{ message }}</li>
+                    {% set displayed = true %}
+                {% endif %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
+
+<div class="button-container">
+    <a href="/plot/student_attendance" class="route-button">Attendance per Student</a>
+    <hr>
+    <a href="/plot/subject_attendance" class="route-button">Attendance per Subject</a>
+    <hr>
+    <a href="/plot/monthly_attendance" class="route-button">Attendance per Month</a>
+</div>
 {% endblock %}
