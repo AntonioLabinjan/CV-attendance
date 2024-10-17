@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flash Message</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .flash-message {
+            background-color: #f8d7da; /* Light red background */
+            color: #721c24; /* Dark red text */
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+    <script>
+        // Redirect after a delay ( 5 seconds)
+        setTimeout(function() {
+            window.location.href = '/';  
+        }, 5000);
+    </script>
+</head>
+<body>
+    <h1>Something went wrong, and here's what:</h1>
+    <div class="flash-message">
+        {{ get_flashed_messages()[0] }}
+    </div>
+    <p>You will be redirected shortly...</p>
+</body>
+</html>
