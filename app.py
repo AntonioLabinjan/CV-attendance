@@ -1,8 +1,10 @@
 from imports import *
 
+
 from db_startup import create_db
 create_db()
 
+from model_loader import load_clip_model
 
 # Load-an stvari iz env fajla
 load_dotenv()
