@@ -1,34 +1,5 @@
-import os
-import cv2
-import numpy as np
-from flask import Flask, Response, render_template, send_file, request, redirect, url_for, jsonify
-import csv
-import io
-from transformers import CLIPProcessor, CLIPModel
-import torch
-import sqlite3
-import datetime
-from datetime import datetime, timedelta
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from werkzeug.security import generate_password_hash, check_password_hash
-import requests
-from werkzeug.security import generate_password_hash, check_password_hash
-import re
-from flask import flash
-from flask_mail import Mail, Message
-import os
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
-import matplotlib.pyplot as plt
-import seaborn as sns
-from flask import send_file
-import io
-from collections import Counter 
-import base64
-import io
+from imports import *
 
-from dotenv import load_dotenv
-import os
 
 # Load-an stvari iz env fajla
 load_dotenv()
@@ -171,8 +142,7 @@ video_capture = cv2.VideoCapture(0)
 # Face detection using Haar Cascade
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
-import sqlite3
-from werkzeug.security import generate_password_hash
+
 
 def create_db():
     conn = sqlite3.connect('attendance.db')
@@ -747,8 +717,9 @@ def plots():
     if attendance_count > 0:
         return render_template('plot_router.html')
     else:
-        flash("No attendance records found. Please add some attendance data before viewing the plots, becuase everything will break if you try to plot non-existing data <3", "error")
-        return render_template('plot_router.html')
+        flash("No attendance records found. Please add some attendance data before viewing the plots, because everything will break if you try to plot non-existing data <3", "error")
+        return render_template('flash_redirect.html')  # Render a new template for displaying the message
+
         
 
 
@@ -971,10 +942,6 @@ def late_entries():
 
 # WEBSCRAPING ROUTES => BEUTIFUL SOUP ZA STRANICE I PDFPLUMBER ZA PDF-OVE
 
-from bs4 import BeautifulSoup
-import requests
-import pdfplumber
-from flask import render_template_string, jsonify
 
 
 
