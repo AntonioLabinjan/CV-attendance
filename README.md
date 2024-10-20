@@ -1,5 +1,5 @@
 ### + dokumentacija
-### popravit dizajn na nekima stvarima
+
 ### napravit UML dijagrame (class)
 ### NAPOMENA: lokalni folder di sve ovo delan se zove WORKING_CV_ATTENDANCE (da ne zabin hehe)
 # Face Recognition Attendance System
