@@ -1,3 +1,5 @@
+# Epoch 120, Loss: 0.0393, Accuracy: 100.00%
+
 import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
