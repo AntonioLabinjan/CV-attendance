@@ -1,3 +1,5 @@
+#### Note to myself: čisto da se osjećan bolje :) => danas smo uspijeli složit liveness detection i malo fine-tunirat clip model
+
 #### Ovaj readme je kaotičan, to ću ben uljepšat kad bude tribalo
 #### + dokumentacija
 
