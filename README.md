@@ -1,4 +1,4 @@
-#### Note to myself: čisto da se osjećan bolje :) => danas smo uspijeli složit liveness detection i malo fine-tunirat clip model
+#### Note to myself: čisto da se osjećan bolje :) => danas smo uspijeli složit liveness detection i solidno fine-tunirat clip model. Daje mi 100% accuracy...vjerojatno ga overfittan kad koristin samo 10 klasa za trening, ali i po defaultu je dosta jak
 
 #### Ovaj readme je kaotičan, to ću ben uljepšat kad bude tribalo
 #### + dokumentacija
