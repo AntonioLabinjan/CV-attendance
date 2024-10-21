@@ -4,6 +4,7 @@ from torchvision import transforms
 from transformers import CLIPProcessor, CLIPModel
 from PIL import Image
 import os
+import matplotlib.pyplot as plt
 
 # Define your dataset class to handle the custom dataset
 class KnownFacesDataset(Dataset):
@@ -59,6 +60,10 @@ classifier = torch.nn.Linear(model.config.projection_dim, len(os.listdir(data_ro
 optimizer = torch.optim.Adam(classifier.parameters(), lr=1e-4)
 loss_fn = torch.nn.CrossEntropyLoss()
 
+# Lists to store the values for plotting
+train_loss = []
+train_acc = []
+
 # Training loop
 for epoch in range(120):  # Number of epochs can be adjusted
     total_loss = 0
@@ -86,7 +91,36 @@ for epoch in range(120):  # Number of epochs can be adjusted
         correct += (predicted == labels).sum().item()
         total_loss += loss.item()
     
-    print(f"Epoch {epoch+1}, Loss: {total_loss/total:.4f}, Accuracy: {100. * correct / total:.2f}%")
+    # Calculate and store loss and accuracy for each epoch
+    avg_loss = total_loss / total
+    accuracy = 100. * correct / total
+    train_loss.append(avg_loss)
+    train_acc.append(accuracy)
+    
+    print(f"Epoch {epoch+1}, Loss: {avg_loss:.4f}, Accuracy: {accuracy:.2f}%")
+
+# Plotting loss and accuracy
+epochs = range(1, 121)
+plt.figure(figsize=(12, 5))
+
+# Loss plot
+plt.subplot(1, 2, 1)
+plt.plot(epochs, train_loss, 'r', label='Loss')
+plt.title('Training Loss')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+
+# Accuracy plot
+plt.subplot(1, 2, 2)
+plt.plot(epochs, train_acc, 'b', label='Accuracy')
+plt.title('Training Accuracy')
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy (%)')
+plt.legend()
+
+plt.tight_layout()
+plt.show()
 
 # Save the fine-tuned classifier
 torch.save(classifier.state_dict(), "fine_tuned_classifier.pth")
