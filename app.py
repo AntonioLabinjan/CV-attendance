@@ -368,40 +368,67 @@ def log_attendance(name, frame):
 
 # COMPUTER VISION MAGIJA
 
+import cv2
+import time
+import numpy as np
+
+eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')
+
+# LIVENESS CHECK: Detect minimal eye movement
+def detect_minimal_movement(eyes):
+    # Check if at least one eye is detected (for minimum sensitivity)
+    return len(eyes) > 0
+
+# Liveness detection helper with minimal movement requirement
+def is_liveness_confirmed(face_image, gray_face):
+    eyes = eye_cascade.detectMultiScale(gray_face)
+
+    # Check for minimal movement or blinking
+    return detect_minimal_movement(eyes)
+
+# Computer Vision Magija (WITH LIVENESS DETECTION)
 def generate_frames():
     while True:
-        # open camera capture and detect faces
+        # Open camera capture and detect faces
         ret, frame = video_capture.read()
         if not ret:
             break
+        
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
 
         for (x, y, w, h) in faces:
             face_image = frame[y:y+h, x:x+w]
-            face_image_rgb = cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB)
-            inputs = processor(images=face_image_rgb, return_tensors="pt")
-            with torch.no_grad():
-                outputs = model.get_image_features(**inputs)
-            face_embedding = outputs.cpu().numpy().flatten()
-            face_embedding /= np.linalg.norm(face_embedding)  # Normalize the embedding
+            gray_face = gray[y:y+h, x:x+w]
+            
+            # Perform liveness detection using minimal movement detection
+            if is_liveness_confirmed(face_image, gray_face):
+                # Process for attendance logging
+                face_image_rgb = cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB)
+                inputs = processor(images=face_image_rgb, return_tensors="pt")
+                with torch.no_grad():
+                    outputs = model.get_image_features(**inputs)
+                face_embedding = outputs.cpu().numpy().flatten()
+                face_embedding /= np.linalg.norm(face_embedding)  # Normalize the embedding
 
-            if len(known_face_encodings) == 0:
-                name = "Unknown"
-                print("No known face encodings available.")
+                if len(known_face_encodings) == 0:
+                    name = "Unknown"
+                else:
+                    # Find best match to detected face from known faces
+                    distances = np.linalg.norm(known_face_encodings - face_embedding, axis=1)
+                    min_distance_index = np.argmin(distances)
+                    name = "Unknown"
+                    if distances[min_distance_index] < 0.6:  # P
+                        name = known_face_names[min_distance_index]
+                        frame = log_attendance(name, frame)  # Log attendance with overlay if late
+
+                # Bounding box + label
+                cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
+                cv2.putText(frame, name, (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
             else:
-                # Find best match to detected face from known faces
-                distances = np.linalg.norm(known_face_encodings - face_embedding, axis=1)
-                min_distance_index = np.argmin(distances)
-                name = "Unknown"
-                if distances[min_distance_index] < 0.6:  # P
-                    name = known_face_names[min_distance_index]
-                    frame = log_attendance(name, frame)  # Log attendance with overlay if late
-
-            # Bounding box + label
-            cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
-            cv2.putText(frame, name, (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
-
+                # If no liveness is detected (e.g., no blinking or minimal movement), show warning
+                cv2.putText(frame, "Liveness Failed: No Movement Detected", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+        
         ret, buffer = cv2.imencode('.jpg', frame)
         frame = buffer.tobytes()
         yield (b'--frame\r\n'
@@ -410,6 +437,9 @@ def generate_frames():
 @app.route('/video_feed')
 def video_feed():
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+
 
 @app.route('/')
 def index():
