@@ -1,4 +1,9 @@
 #### Note to myself: čisto da se osjećan bolje :) => danas smo uspijeli složit liveness detection
+
+Ovo je bolji liveness detection; implement it
+https://dev.to/alex_boykov/how-do-i-implement-liveness-detection-in-python-to-prevent-fraud-50c6
+
+
 #### APP JE MANJE-VIŠE RIJEŠEN, SAD TREBA TUNIRAT CLIP : https://colab.research.google.com/drive/19LnwteQm3fQDx77hlOybQwT5xq5t6Yk1?usp=sharing#scrollTo=CmTFz3RObaWr
 #### Ovaj readme je kaotičan, to ću ben uljepšat kad bude tribalo
 #### + dokumentacija
