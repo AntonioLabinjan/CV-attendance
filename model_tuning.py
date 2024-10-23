@@ -1,4 +1,5 @@
 # UPDATE: NE GLEDA SE ACCURACY, NEGO LOSS, JER JE ACCURACY MISLEADING
+# Ovo ni baš dobro
 # Ono prije ni valjalo jer doslovno nisan validira model, nego san gleda samo običan accuracy
 #Epoch 120, Loss: 0.0852, Accuracy: 82.86%, Val Loss: 0.1954, Val Accuracy: 77.78%
 
