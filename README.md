@@ -1,5 +1,5 @@
-#### Note to myself: čisto da se osjećan bolje :) => danas smo uspijeli složit liveness detection i solidno fine-tunirat clip model. Daje mi 100% accuracy...vjerojatno ga overfittan kad koristin samo 10 klasa za trening, ali i po defaultu je dosta jak
-
+#### Note to myself: čisto da se osjećan bolje :) => danas smo uspijeli složit liveness detection
+#### APP JE MANJE-VIŠE RIJEŠEN, SAD TREBA TUNIRAT CLIP : https://colab.research.google.com/drive/19LnwteQm3fQDx77hlOybQwT5xq5t6Yk1?usp=sharing#scrollTo=CmTFz3RObaWr
 #### Ovaj readme je kaotičan, to ću ben uljepšat kad bude tribalo
 #### + dokumentacija
 
