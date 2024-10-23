@@ -321,7 +321,45 @@ def send_attendance_notification(name, date, time, subject):
 
 
 
+import cv2
+import numpy as np
+import sqlite3
+from datetime import datetime, timedelta
+
+# Load Haar cascade for face detection
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')
+
+# Global variables
+current_subject = None
+attendance_date = None
+start_time = None
+end_time = None
+
+def detect_face(frame):
+    """Detect faces in the frame using Haar cascades."""
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+    return faces
+
+def detect_eye_movement(frame, face):
+    """Check for eye movement (blinking) by detecting eyes."""
+    (x, y, w, h) = face
+    roi_gray = frame[y:y + h, x:x + w]
+    eyes = eye_cascade.detectMultiScale(roi_gray)
+
+    # Check if two eyes are detected for liveness
+    return len(eyes) >= 2  # Live face detected (eyes are open)
+
+def check_liveness(frame, faces):
+    """Check if the detected face is live."""
+    for face in faces:
+        if detect_eye_movement(frame, face):
+            return True  # Live face detected
+    return False  # Spoof detected
+
 def log_attendance(name, frame):
+    """Log attendance if the subject is set and current time is within the allowed interval."""
     global current_subject, attendance_date, start_time, end_time
     if current_subject is None or not is_within_time_interval():
         print("Subject is not set or current time is outside of allowed interval. Attendance not logged.")
@@ -334,7 +372,7 @@ def log_attendance(name, frame):
     # Create datetime object for start time
     start_time_obj = datetime.strptime(f"{attendance_date} {start_time}", "%Y-%m-%d %H:%M")
 
-    # Toleriramo do 15 minuta kašnjenja (akademska četvrt :))
+    # Tolerate up to 15 minutes delay (academic quarter)
     late_time_obj = start_time_obj + timedelta(minutes=14)
 
     # Check if the current time is late
@@ -359,84 +397,104 @@ def log_attendance(name, frame):
 
     print(f"Logged attendance for {name} on {date} at {time} for subject {current_subject}.")
 
-
     send_attendance_notification(name, date, time, current_subject)
 
     return frame
 
+def perform_liveness_check(frame):
+    """Capture video from the camera and perform liveness detection."""
+    cap = cv2.VideoCapture(0)  # Use the primary camera
+    live_face_detected = False
 
+    ret, frame = cap.read()
+    if not ret:
+        cap.release()
+        return False
+
+    # Detect faces in the current frame
+    faces = detect_face(frame)
+
+    # If faces are detected, check for liveness
+    for face in faces:
+        is_alive = check_liveness(frame, [face])
+        (x, y, w, h) = face
+
+        # Draw a bounding box around the detected face
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)  # Blue box
+
+        if is_alive:
+            live_face_detected = True
+            print("OK, real")
+            cv2.putText(frame, "Live Face Detected", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
+        else:
+            print("ERROR, fake")
+            cv2.putText(frame, "Spoof Detected", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
+
+    cap.release()
+
+    return live_face_detected
 
 # COMPUTER VISION MAGIJA
-
-import cv2
-import time
-import numpy as np
-
-eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')
-
-# LIVENESS CHECK: Detect minimal eye movement
-def detect_minimal_movement(eyes):
-    # Check if at least one eye is detected (for minimum sensitivity)
-    return len(eyes) > 0
-
-# Liveness detection helper with minimal movement requirement
-def is_liveness_confirmed(face_image, gray_face):
-    eyes = eye_cascade.detectMultiScale(gray_face)
-
-    # Check for minimal movement or blinking
-    return detect_minimal_movement(eyes)
-
-# Computer Vision Magija (WITH LIVENESS DETECTION)
 def generate_frames():
+    cap = cv2.VideoCapture(0)  # Initialize the camera
+
+    if not cap.isOpened():
+        print("Error: Camera could not be opened.")
+        return  # Exit if the camera cannot be opened
+
     while True:
-        # Open camera capture and detect faces
-        ret, frame = video_capture.read()
-        if not ret:
-            break
+        ret, frame = cap.read()
         
+        if not ret:
+            print("Warning: Couldn't grab frame. Retrying...")
+            continue  # Retry the frame grab on failure
+
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
 
         for (x, y, w, h) in faces:
             face_image = frame[y:y+h, x:x+w]
             gray_face = gray[y:y+h, x:x+w]
-            
-            # Perform liveness detection using minimal movement detection
-            if is_liveness_confirmed(face_image, gray_face):
+
+            # Perform liveness detection
+            if check_liveness(frame, [ (x, y, w, h) ]):  # Check liveness for the current face
                 # Process for attendance logging
                 face_image_rgb = cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB)
                 inputs = processor(images=face_image_rgb, return_tensors="pt")
                 with torch.no_grad():
                     outputs = model.get_image_features(**inputs)
                 face_embedding = outputs.cpu().numpy().flatten()
-                face_embedding /= np.linalg.norm(face_embedding)  # Normalize the embedding
+                face_embedding /= np.linalg.norm(face_embedding)
 
                 if len(known_face_encodings) == 0:
                     name = "Unknown"
                 else:
-                    # Find best match to detected face from known faces
                     distances = np.linalg.norm(known_face_encodings - face_embedding, axis=1)
                     min_distance_index = np.argmin(distances)
                     name = "Unknown"
-                    if distances[min_distance_index] < 0.6:  # P
+                    if distances[min_distance_index] < 0.6:
                         name = known_face_names[min_distance_index]
-                        frame = log_attendance(name, frame)  # Log attendance with overlay if late
+                        frame = log_attendance(name, frame)  # Log attendance
 
-                # Bounding box + label
+                # Draw bounding box and label
                 cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
                 cv2.putText(frame, name, (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
             else:
-                # If no liveness is detected (e.g., no blinking or minimal movement), show warning
                 cv2.putText(frame, "Liveness Failed: No Movement Detected", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-        
+
         ret, buffer = cv2.imencode('.jpg', frame)
         frame = buffer.tobytes()
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
+    cap.release()  # Ensure the camera is released when done
+
+
+
 @app.route('/video_feed')
 def video_feed():
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
 
 
 
