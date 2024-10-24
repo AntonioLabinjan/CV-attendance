@@ -32,6 +32,7 @@
         .dropdown-content {
             display: none;
             position: absolute;
+            right: 0;
             background-color: #343a40;
             min-width: 200px;
             box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
@@ -39,7 +40,6 @@
             z-index: 1;
         }
 
-        /* Links inside the dropdown */
         .dropdown-content a {
             color: white;
             padding: 12px 16px;
@@ -48,29 +48,23 @@
             transition: background-color 0.3s ease;
         }
 
-        /* Hover effect on dropdown links */
         .dropdown-content a:hover {
             background-color: #495057;
         }
 
-        /* Show the dropdown menu on hover */
         .dropdown:hover .dropdown-content {
             display: block;
         }
 
-        /* Container for the weather section */
-        .mt-5 {
-            margin-top: 40px;
-        }
-
+        /* Body Styling */
         body {
-    font-family: 'Courier New', Courier, monospace;
-    background-color: #222; /* Darker background */
-    color: #e0e0e0; /* Lighter text */
-    margin: 0;
-    padding: 0;
-    text-align: center;
-}
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #222;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
 
         h2 {
             color: #0056b3;
@@ -79,12 +73,56 @@
         h3 {
             margin-top: 40px;
         }
+
+        /* Privacy Policy Hover Effect */
+        .privacy-container {
+            position: relative;
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        .privacy-container button {
+            padding: 8px 16px;
+            background-color: #343a40;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .privacy-container button:hover {
+            background-color: #495057;
+        }
+
+        /* Hidden privacy text */
+        .privacy-text {
+            display: none;
+            position: absolute;
+            top: 150%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #343a40;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            width: 250px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+            z-index: 1;
+            text-align: left;
+        }
+
+        /* Show privacy text on hover */
+        .privacy-container:hover .privacy-text {
+            display: block;
+        }
+
     </style>
 </head>
 <body>
     <h2>Welcome {{ current_user.username }}!</h2>
 
-    <!-- Dropdown button and menu -->
     <div class="dropdown">
         <button>Menu</button>
         <div class="dropdown-content">
@@ -103,7 +141,6 @@
         </div>
     </div>
 
-    <!-- Weather section -->
     <div class="mt-5">
         <h3>Weather Forecast</h3>
         <p>Current weather: <strong>{{ weather_condition }}</strong></p>
@@ -111,17 +148,16 @@
     </div>
 
     <form action="{{ url_for('github_profile') }}" method="get">
-      <button type="submit" style="
-          padding: 6px 12px;  /* Smaller padding */
-          font-size: 12px;  /* Smaller font size */
-          background-color: #000000;  /* Dark background */
-          color: white;  /* Light text */
-          border: none;
-          border-radius: 4px;  /* Rounded corners */
-          cursor: pointer;
-          transition: background-color 0.3s ease;
-      ">About Author</button>
-  </form>
-  
+        <button type="submit">About Author</button>
+    </form>
+
+    <!-- Privacy Policy Button with Hover Effect -->
+    <div class="privacy-container">
+        <button>Privacy Policy</button>
+        <div class="privacy-text">
+            <p>Your facial recognition data is used solely for attendance purposes and is not shared with any third parties. No external entities have, or will ever have, access to this data.</p>
+        </div>
+    </div>
+
 </body>
 </html>
