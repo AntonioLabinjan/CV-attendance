@@ -165,7 +165,7 @@ def validate_password(password):
         return "Password must contain at least one lowercase letter."
     if not re.search(r"\d", password):
         return "Password must contain at least one number."
-    if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
+    if not re.search(r"[!@#$%^&*(),.?\":{}|<>/]", password):
         return "Password must contain at least one special character."
     return None
 
@@ -539,18 +539,28 @@ def video_feed():
 
 
 
+
 @app.route('/')
 def index():
     api_key = os.getenv('WEATHER_API_KEY')
-    location = "London" # Ili nešto drugo
+    location = "London"  # Ili nešto drugo
     weather_condition = get_weather_forecast(api_key, location)
     
+    # Logika za vremensku prognozu
     if predict_absence_due_to_weather(weather_condition):
         message = "Bad weather predicted, late entries due to traffic problems are possible."
     else:
-        message = "No significant weather issues expected. Students should come on time"
+        message = "No significant weather issues expected. Students should come on time."
     
-    return render_template('index.html', weather_condition=weather_condition, message=message)
+    # Provjera je li korisnik već vidio popup
+    if 'seen_privacy_policy' not in session:
+        show_popup = True
+        session['seen_privacy_policy'] = False  # Postavljanje sesije kako bi pop-up bio prikazan samo jednom
+    else:
+        show_popup = False
+    
+    return render_template('index.html', weather_condition=weather_condition, message=message, show_popup=show_popup)
+
 
 @app.route('/attendance', methods=['GET'])
 @login_required
