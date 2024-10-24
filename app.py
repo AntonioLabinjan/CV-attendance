@@ -1076,14 +1076,20 @@ def scrape_github_profile(url):
         # Extract number of followers
         followers = soup.find('span', class_='text-bold').text.strip()
 
+        # Extract number of repositories
+        repositories_element = soup.find('span', class_='Counter')
+        repositories = repositories_element.text.strip() if repositories_element else '0'  # Safely handle missing repositories
+
         return {
             'name': name,
             'bio': bio,
             'followers': followers,
+            'repositories': repositories,  # Always return repositories key
         }
     except Exception as e:
         print(f"Error scraping the website: {e}")
         return None
+
 
 @app.route('/scrape_github', methods=['GET'])
 def github_profile():
@@ -1129,9 +1135,9 @@ def github_profile():
                     font-size: 18px;
                     line-height: 1.6;
                 }}
-                .followers {{
+                .followers, .repositories {{
                     font-weight: bold;
-                    color: #ff6600; /* Orange color for followers text */
+                    color: #ff6600; /* Orange color for followers and repositories text */
                     font-size: 20px;
                 }}
             </style>
@@ -1141,6 +1147,7 @@ def github_profile():
                 <h1>{profile_info['name']}</h1>
                 <p><strong>Bio:</strong> {profile_info['bio']}</p>
                 <p class="followers">Followers: {profile_info['followers']}</p>
+                <p class="repositories">Repositories: {profile_info['repositories']}</p> <!-- New line for repositories -->
             </div>
         </body>
         </html>
@@ -1148,6 +1155,7 @@ def github_profile():
         return render_template_string(html_content), 200
     else:
         return jsonify({"error": "Failed to scrape the GitHub profile"}), 500
+
 
 
 
