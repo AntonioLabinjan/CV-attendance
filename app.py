@@ -351,6 +351,41 @@ def detect_eye_movement(frame, face):
     # Check if two eyes are detected for liveness
     return len(eyes) >= 2  # Live face detected (eyes are open)
 
+def detect_eye_blink(face, gray_frame):
+    (x, y, w, h) = face
+    roi_gray = gray_frame[y:y+h, x:x+w]
+    eyes = eye_cascade.detectMultiScale(roi_gray)
+    return len(eyes) < 2  # Eyes are closed if fewer than 2 eyes are detected
+
+def detect_head_movement(old_gray, new_gray, faces):
+    for face in faces:
+        (x, y, w, h) = face
+        roi_old = old_gray[y:y+h, x:x+w]
+        roi_new = new_gray[y:y+h, x:x+w]
+        difference = cv2.absdiff(roi_old, roi_new)
+        non_zero_count = np.count_nonzero(difference)
+        if non_zero_count > 500:  # Threshold for movement
+            return True
+    return False
+
+liveness_frame_count = 0
+LIVENESS_FRAMES_THRESHOLD = 5  # Number of consecutive frames for liveness confirmation
+
+def check_liveness_over_time(frame, faces, old_gray, new_gray):
+    global liveness_frame_count
+    for face in faces:
+        eyes_closed = detect_eye_blink(face, new_gray)
+        head_moved = detect_head_movement(old_gray, new_gray, faces)
+        
+        if not eyes_closed and head_moved:  # Both conditions should be true for liveness
+            liveness_frame_count += 1
+        else:
+            liveness_frame_count = 0  # Reset if liveness is not detected in a frame
+    
+    if liveness_frame_count >= LIVENESS_FRAMES_THRESHOLD:
+        return True  # Confirm liveness after consistent detection over frames
+    return False
+
 def check_liveness(frame, faces):
     """Check if the detected face is live."""
     for face in faces:
@@ -436,29 +471,33 @@ def perform_liveness_check(frame):
 
 # COMPUTER VISION MAGIJA
 def generate_frames():
-    cap = cv2.VideoCapture(0)  # Initialize the camera
+    cap = cv2.VideoCapture(0)
+    old_gray = None
+    global liveness_frame_count
 
     if not cap.isOpened():
         print("Error: Camera could not be opened.")
-        return  # Exit if the camera cannot be opened
+        return
 
     while True:
         ret, frame = cap.read()
-        
         if not ret:
             print("Warning: Couldn't grab frame. Retrying...")
-            continue  # Retry the frame grab on failure
+            continue
 
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+        faces = detect_face(frame)
 
-        for (x, y, w, h) in faces:
-            face_image = frame[y:y+h, x:x+w]
-            gray_face = gray[y:y+h, x:x+w]
+        if old_gray is None:
+            old_gray = gray.copy()
 
-            # Perform liveness detection
-            if check_liveness(frame, [ (x, y, w, h) ]):  # Check liveness for the current face
-                # Process for attendance logging
+        if check_liveness_over_time(frame, faces, old_gray, gray):
+            cv2.putText(frame, "Liveness Confirmed", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            # Proceed with facial recognition and attendance logging
+            for (x, y, w, h) in faces:
+                face_image = frame[y:y+h, x:x+w]
+                gray_face = gray[y:y+h, x:x+w]
+
                 face_image_rgb = cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB)
                 inputs = processor(images=face_image_rgb, return_tensors="pt")
                 with torch.no_grad():
@@ -474,20 +513,21 @@ def generate_frames():
                     name = "Unknown"
                     if distances[min_distance_index] < 0.6:
                         name = known_face_names[min_distance_index]
-                        frame = log_attendance(name, frame)  # Log attendance
+                        frame = log_attendance(name, frame)
 
-                # Draw bounding box and label
-                cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
-                cv2.putText(frame, name, (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
-            else:
-                cv2.putText(frame, "Liveness Failed: No Movement Detected", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
+                cv2.putText(frame, name, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
+        else:
+            cv2.putText(frame, "Liveness Failed: No Movement Detected", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+
+        old_gray = gray.copy()  # Update old frame for the next iteration
 
         ret, buffer = cv2.imencode('.jpg', frame)
         frame = buffer.tobytes()
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
-    cap.release()  # Ensure the camera is released when done
+    cap.release()
 
 
 
