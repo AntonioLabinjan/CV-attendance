@@ -2,7 +2,8 @@
 # Ovo ni baš dobro
 # Ono prije ni valjalo jer doslovno nisan validira model, nego san gleda samo običan accuracy
 #Epoch 120, Loss: 0.0852, Accuracy: 82.86%, Val Loss: 0.1954, Val Accuracy: 77.78%
-
+#https://colab.research.google.com/drive/1qRAu902U1vWxUgDKnpomD5diilk3OPSF?authuser=2#scrollTo=I_yIS_eA40QL
+# Moran složit bolji dataset (više klasa i instanci)
 import torch
 from torch.utils.data import Dataset, DataLoader, random_split
 from torchvision import transforms
