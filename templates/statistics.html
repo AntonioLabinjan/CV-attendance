@@ -20,6 +20,7 @@
             color: #555;
             margin-top: 30px;
             margin-bottom: 10px;
+            text-align: center;
         }
         table {
             width: 100%;
@@ -43,6 +44,34 @@
         tr:hover {
             background-color: #e9ecef;
         }
+
+        /* Mobile Styling */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            h1, h2 {
+                font-size: 1.2rem;
+                margin-bottom: 15px;
+            }
+
+            table {
+                width: 100%;
+                font-size: 0.9rem;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+
+            /* Wrap table in a container with overflow scroll for small screens */
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
     </style>
 {% endblock %}
 
@@ -50,40 +79,44 @@
 <h1>Attendance Statistics</h1>
 
 <h2>Student Attendance Counts</h2>
-<table>
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Subject</th>
-            <th>Attendance Count</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for name, subject, count in student_attendance %}
-        <tr>
-            <td>{{ name }}</td>
-            <td>{{ subject }}</td>
-            <td>{{ count }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div style="overflow-x:auto;">
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Subject</th>
+                <th>Attendance Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for name, subject, count in student_attendance %}
+            <tr>
+                <td>{{ name }}</td>
+                <td>{{ subject }}</td>
+                <td>{{ count }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
 <h2>Subject Attendance Counts</h2>
-<table>
-    <thead>
-        <tr>
-            <th>Subject</th>
-            <th>Attendance Count</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for subject, count in subject_attendance %}
-        <tr>
-            <td>{{ subject }}</td>
-            <td>{{ count }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div style="overflow-x:auto;">
+    <table>
+        <thead>
+            <tr>
+                <th>Subject</th>
+                <th>Attendance Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for subject, count in subject_attendance %}
+            <tr>
+                <td>{{ subject }}</td>
+                <td>{{ count }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}
