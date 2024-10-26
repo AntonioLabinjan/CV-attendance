@@ -8,6 +8,39 @@
     <style>
         .met { color: green; font-weight: bold; }
         .not-met { color: red; font-weight: bold; }
+
+        /* Mobile styling */
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .average-attendance {
+                font-size: 1rem;
+            }
+
+            ul {
+                padding-left: 0;
+                list-style-type: none; /* Remove default list styling */
+            }
+
+            li {
+                font-size: 0.9rem;
+                margin-bottom: 8px; /* Add some space between items */
+            }
+
+            strong {
+                font-size: 1rem; /* Increase bold text size for better visibility */
+            }
+
+            .met, .not-met {
+                font-size: 0.9rem; /* Adjust size of status indicators */
+            }
+        }
     </style>
 </head>
 <body>
