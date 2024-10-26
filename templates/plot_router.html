@@ -14,19 +14,24 @@
             justify-content: center;
             height: 100vh;
             margin: 0;
+            padding: 20px;
         }
         h1 {
             color: #333;
             margin-bottom: 30px;
+            text-align: center;
+            font-size: 1.5rem;
         }
         .button-container {
             display: flex;
             flex-direction: column;
             gap: 15px;
+            width: 100%;
+            max-width: 300px;
         }
         .route-button {
             display: inline-block;
-            padding: 15px 30px;
+            padding: 15px;
             font-size: 18px;
             color: #fff;
             background-color: #007bff;
@@ -36,6 +41,8 @@
             text-decoration: none;
             cursor: pointer;
             transition: background-color 0.3s ease, transform 0.2s ease;
+            width: 100%;
+            box-sizing: border-box;
         }
         .route-button:hover {
             background-color: #0056b3;
@@ -47,6 +54,8 @@
         }
         .flash-messages {
             margin: 10px 0;
+            width: 100%;
+            max-width: 300px;
         }
         .flash {
             padding: 10px;
@@ -60,6 +69,18 @@
         .flash.success {
             background-color: #d4edda;
             color: #155724;
+        }
+
+        /* Mobile Styling */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.2rem;
+                margin-bottom: 20px;
+            }
+            .route-button {
+                font-size: 16px;
+                padding: 12px;
+            }
         }
     </style>
 {% endblock %}
