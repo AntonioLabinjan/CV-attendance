@@ -871,11 +871,11 @@ def predict_absence():
     })
 
 
-tokenizer, model = load_model_and_tokenizer()
+tokenizer, model2 = load_model_and_tokenizer()
 
 def is_inappropriate_content(message, threshold=0.30):
     inputs = tokenizer(message, return_tensors="pt")
-    outputs = model(**inputs)
+    outputs = model2(**inputs)
     probs = torch.nn.functional.softmax(outputs.logits, dim=-1)
     offensive_score = probs[0][1].item()  #label index 1 corresponds to "offensive" class
     return offensive_score > threshold
