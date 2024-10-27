@@ -5,6 +5,7 @@ from db_startup import create_db
 create_db()
 
 from model_loader import load_clip_model
+from load_post_check import load_model_and_tokenizer
 
 # Load-an stvari iz env fajla
 load_dotenv()
@@ -869,6 +870,17 @@ def predict_absence():
         "message": message
     })
 
+
+tokenizer, model = load_model_and_tokenizer()
+
+def is_inappropriate_content(message, threshold=0.30):
+    inputs = tokenizer(message, return_tensors="pt")
+    outputs = model(**inputs)
+    probs = torch.nn.functional.softmax(outputs.logits, dim=-1)
+    offensive_score = probs[0][1].item()  #label index 1 corresponds to "offensive" class
+    return offensive_score > threshold
+
+
 # OVO JE KAO NEKI PROFESORSKI FORUM/CHAT ILI ČA JA ZNAN KAKO BI SE TO ZVALO
 @app.route('/announcements', methods=['GET'])
 @login_required
@@ -884,9 +896,16 @@ def announcements():
 @login_required
 def post_announcement():
     message = request.form['message']
+    
+    # Check if message is appropriate
+    if is_inappropriate_content(message):
+        # Redirect with a warning if content is inappropriate
+        return redirect(url_for('announcements', warning="Your announcement contains inappropriate language and was not posted."))
+    
     date_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     teacher_name = current_user.username
 
+    # Insert the announcement into the database
     conn = sqlite3.connect('attendance.db')
     c = conn.cursor()
     c.execute("INSERT INTO announcements (date_time, teacher_name, message) VALUES (?, ?, ?)",
@@ -905,6 +924,8 @@ def delete_announcement(id):
     conn.close()
     return redirect(url_for('announcements'))
 
+from flask import flash  # Import flash for showing messages
+
 @app.route('/edit_announcement/<int:id>', methods=['GET', 'POST'])
 @login_required
 def edit_announcement(id):
@@ -916,12 +937,17 @@ def edit_announcement(id):
         date_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         teacher_name = current_user.username
 
+        # Check for inappropriate content
+        if is_inappropriate_content(message, threshold=0.5):  # Adjust threshold as needed
+            flash('Your announcement contains inappropriate content and cannot be saved.', 'error')
+            return redirect(url_for('edit_announcement', id=id))  # Redirect back to edit page
+
         c.execute("UPDATE announcements SET date_time = ?, message = ? WHERE id = ? AND teacher_name = ?",
                   (date_time, message, id, teacher_name))
         conn.commit()
         conn.close()
         return redirect(url_for('announcements'))
-    
+
     c.execute("SELECT * FROM announcements WHERE id = ?", (id,))
     announcement = c.fetchone()
     conn.close()
@@ -930,6 +956,7 @@ def edit_announcement(id):
         return redirect(url_for('announcements'))  # Redirect if announcement not found or not owned by user
 
     return render_template('edit_announcement.html', announcement=announcement)
+
 
 # Ruta koja će najprije provjerit koliko predaanja je održano iz pojedinega predmeta
 # Onda će provjerit za svakega studenta na koliko predavanja je bija
