@@ -1176,6 +1176,19 @@ def github_profile():
                     border: 2px solid #ff6600;
                     margin-bottom: 20px;
                 }}
+                .back-button {{
+                    margin-top: 20px;
+                    padding: 10px 20px;
+                    font-size: 18px;
+                    color: #fff;
+                    background-color: #ff6600;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                }}
+                .back-button:hover {{
+                    background-color: #cc5200;
+                }}
             </style>
         </head>
         <body>
@@ -1185,6 +1198,7 @@ def github_profile():
                 <p><strong>Bio:</strong> {profile_info['bio']}</p>
                 <p class="followers">Followers: {profile_info['followers']}</p>
                 <p class="repositories">Repositories: {profile_info['repositories']}</p>
+                <button class="back-button" onclick="window.location.href='/'">Go to Home</button>
             </div>
         </body>
         </html>
