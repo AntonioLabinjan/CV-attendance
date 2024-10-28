@@ -338,7 +338,6 @@ start_time = None
 end_time = None
 
 def detect_face(frame):
-    """Detect faces in the frame using Haar cascades."""
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
     return faces
@@ -387,7 +386,7 @@ def check_liveness_over_time(frame, faces, old_gray, new_gray):
         return True  # Confirm liveness after consistent detection over frames
     return False
 
-def check_liveness(frame, faces):
+async def check_liveness(frame, faces):
     """Check if the detected face is live."""
     for face in faces:
         if detect_eye_movement(frame, face):
