@@ -306,7 +306,7 @@ def add_student_success():
 def send_attendance_notification(name, date, time, subject):
     message = Mail(
         from_email='attendance.logged@gmail.com', 
-        to_emails='alabinjan6@gmail.com', # napravit neki official mail za ovaj app da ne koristin svoj stari mail
+        to_emails='alabinjan6@gmail.com', # napravit neki official mail za ovaj app da ne koristin svoj mail
         subject=f'Attendance Logged for {name}',
         plain_text_content=f'Attendance for {name} in {subject} on {date} at {time} was successfully logged.'
     )
@@ -544,7 +544,7 @@ def video_feed():
 @app.route('/')
 def index():
     api_key = os.getenv('WEATHER_API_KEY')
-    location = "London"  # Ili nešto drugo
+    location = "Pula"  # Ili nešto drugo
     weather_condition = get_weather_forecast(api_key, location)
     
     # Logika za vremensku prognozu
@@ -1083,8 +1083,6 @@ def late_entries():
 # WEBSCRAPING ROUTES => BEUTIFUL SOUP ZA STRANICE I PDFPLUMBER ZA PDF-OVE
 
 
-
-
 def scrape_github_profile(url):
     try:
         # Send an HTTP request to the GitHub profile page
@@ -1100,6 +1098,9 @@ def scrape_github_profile(url):
         # Extract the bio (if available)
         bio = soup.find('div', class_='p-note user-profile-bio mb-3 js-user-profile-bio f4').text.strip() if soup.find('div', class_='p-note user-profile-bio mb-3 js-user-profile-bio f4') else 'No bio available'
 
+        # Extract the profile picture URL
+        profile_picture = soup.find('img', class_='avatar-user')['src'] if soup.find('img', class_='avatar-user') else None
+
         # Extract number of followers
         followers = soup.find('span', class_='text-bold').text.strip()
 
@@ -1110,8 +1111,9 @@ def scrape_github_profile(url):
         return {
             'name': name,
             'bio': bio,
+            'profile_picture': profile_picture,
             'followers': followers,
-            'repositories': repositories,  # Always return repositories key
+            'repositories': repositories,
         }
     except Exception as e:
         print(f"Error scraping the website: {e}")
@@ -1167,14 +1169,22 @@ def github_profile():
                     color: #ff6600; /* Orange color for followers and repositories text */
                     font-size: 20px;
                 }}
+                .profile-picture {{
+                    width: 150px;
+                    height: 150px;
+                    border-radius: 50%;
+                    border: 2px solid #ff6600;
+                    margin-bottom: 20px;
+                }}
             </style>
         </head>
         <body>
             <div class="container">
+                <img src="{profile_info['profile_picture']}" alt="Profile Picture" class="profile-picture">
                 <h1>{profile_info['name']}</h1>
                 <p><strong>Bio:</strong> {profile_info['bio']}</p>
                 <p class="followers">Followers: {profile_info['followers']}</p>
-                <p class="repositories">Repositories: {profile_info['repositories']}</p> <!-- New line for repositories -->
+                <p class="repositories">Repositories: {profile_info['repositories']}</p>
             </div>
         </body>
         </html>
