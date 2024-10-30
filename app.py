@@ -149,6 +149,9 @@ face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_fronta
 
 
 
+
+
+
 # Inicijaliziranje atributa za trenutnu prisutnost
 current_subject = None
 attendance_date = None
@@ -313,7 +316,8 @@ def send_attendance_notification(name, date, time, subject):
     
     try:
         print("Attempting to send email...")
-        sg = SendGridAPIClient('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')
+        #sendgrid_api_key = os.getenv('SENDGRID_API_KEY')
+        sg = SendGridAPIClient(os.getenv('SENDGRID_API_KEY'))
         response = sg.send(message)
         print(f"Email sent: {response.status_code}")
         print(f"Response body: {response.body}")  # Debug
@@ -328,7 +332,6 @@ import sqlite3
 from datetime import datetime, timedelta
 
 # Load Haar cascade for face detection
-face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')
 
 # Global variables
@@ -338,6 +341,7 @@ start_time = None
 end_time = None
 
 def detect_face(frame):
+    """Detect faces in the frame using Haar cascades."""
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
     return faces
@@ -364,7 +368,7 @@ def detect_head_movement(old_gray, new_gray, faces):
         roi_new = new_gray[y:y+h, x:x+w]
         difference = cv2.absdiff(roi_old, roi_new)
         non_zero_count = np.count_nonzero(difference)
-        if non_zero_count > 500:  # Threshold for movement
+        if non_zero_count > 200:  # Threshold for movement
             return True
     return False
 
