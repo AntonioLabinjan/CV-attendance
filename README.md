@@ -3,6 +3,7 @@
 #### Čudan pokušaj tuninga clip-a: https://colab.research.google.com/drive/19LnwteQm3fQDx77hlOybQwT5xq5t6Yk1?usp=sharing#scrollTo=CmTFz3RObaWr
 #### Ovaj readme je kaotičan, to ću ben uljepšat kad bude tribalo
 #### + dokumentacija
+#### + nekako složit neki stil. NE ZNAN TO NAPRAVIT KAKO TRIBA...morat ću iskopirat neki bootstrap
 
 ### napravit UML dijagrame (class)
 ### NAPOMENA: lokalni folder di sve ovo delan se zove WORKING_CV_ATTENDANCE (da ne zabin hehe)
