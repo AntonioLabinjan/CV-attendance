@@ -10,7 +10,6 @@
         .dropdown {
             position: relative;
             display: inline-block;
-            float: right;
         }
 
         /* Dropdown button styling */
@@ -33,7 +32,7 @@
         .dropdown-content {
             display: none;
             position: absolute;
-            right: 0;
+            right: 0; /* Align the dropdown menu to the right */
             background-color: #343a40;
             min-width: 200px;
             box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
@@ -78,18 +77,23 @@
             color: #b9661e;
             margin: 40px;
         }
+
+        nav {
+            text-align: right; /* Align the navbar and dropdown to the right */
+        }
     </style>
 </head>
 <body>
     <header>
         <nav>
             <div class="dropdown">
-            <button>Menu</button>
+                <button>Menu</button>
                 <div class="dropdown-content">
                     <a href="{{ url_for('index') }}">Home</a>
                     <a href="{{ url_for('set_subject') }}">Set Subject</a>
                     <a href="{{ url_for('video_feed') }}">Start Attendance</a>
-                    <a href="{{ url_for('add_student') }}">Add Student</a>
+                    <a href="{{ url_for('add_student') }}">Add Student Manually</a>
+                    <a href="{{ url_for('add_student_live')}}">Add Student Live</a>
                     <a href="{{ url_for('attendance') }}">View Attendance</a>
                     <a href="{{ url_for('statistics') }}">Statistics</a>
                     <a href="{{ url_for('students') }}">Students</a>
