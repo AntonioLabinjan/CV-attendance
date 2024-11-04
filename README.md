@@ -1,4 +1,4 @@
-## TODO: IMPLEMENTIRAT LIVE DODAVANJE STUDENATA (NE PREKO SLIKE, NEGO NEKAKO AUTOMATSKI) => to će da bude zabavno hehe => forši da se opre camera feed, i da automatski slika i sprema u folder. Ili da automatski slika ili nešto
+## ~~TODO: IMPLEMENTIRAT LIVE DODAVANJE STUDENATA (NE PREKO SLIKE, NEGO NEKAKO AUTOMATSKI) => to će da bude zabavno hehe => forši da se opre camera feed, i da automatski slika i sprema u folder. Ili da automatski slika ili nešto~~ => did it...čak i ni bilo teško, osim par tehničkih fuck-upsa
 
 
 #### Čudan pokušaj tuninga clip-a: https://colab.research.google.com/drive/19LnwteQm3fQDx77hlOybQwT5xq5t6Yk1?usp=sharing#scrollTo=CmTFz3RObaWr
