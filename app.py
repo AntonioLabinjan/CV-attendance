@@ -26,8 +26,9 @@ sendgrid_api_key = os.getenv('SENDGRID_API_KEY')
 
 
 # Init model
-model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
-processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+weights_path = "C:/Users/Korisnik/Desktop/WORKING_CV_ATTENDANCE/fine_tuned_classifier.pth"
+dataset_path = "C:/Users/Korisnik/Desktop/WORKING_CV_ATTENDANCE/known_faces"
+model, processor, classifier = load_clip_model(weights_path, dataset_path)
 
 # In-memory storage za lica; ovo čak i ne triba spremat u bazu jer: 
                                     # a) svaki put pozovemo funkciju za loading usera kad palimo app i vjerojatno je isto brzo dali ih učita ovako, ili selektira iz baze
