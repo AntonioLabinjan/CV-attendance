@@ -1,3 +1,6 @@
+OVO JE JEBENO BITNO: https://colab.research.google.com/drive/1ZKVMC7qs3HBf3a2hHpYBdOiWyWDQUK8O#scrollTo=_O9W2yRrTOXn
+
+
 Dodat rutu za broj prisutnih po svakemu predavanju na određeni datum
 
 ## ~~TODO: IMPLEMENTIRAT LIVE DODAVANJE STUDENATA (NE PREKO SLIKE, NEGO NEKAKO AUTOMATSKI) => to će da bude zabavno hehe => forši da se opre camera feed, i da automatski slika i sprema u folder. Ili da automatski slika ili nešto~~ => did it...čak i ni bilo teško, osim par tehničkih fuck-upsa
