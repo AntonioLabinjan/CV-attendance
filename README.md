@@ -1,4 +1,4 @@
-OVO JE JEBENO BITNO: https://colab.research.google.com/drive/1ZKVMC7qs3HBf3a2hHpYBdOiWyWDQUK8O#scrollTo=_O9W2yRrTOXn
+OVO JE Jako BITNO: https://colab.research.google.com/drive/1ZKVMC7qs3HBf3a2hHpYBdOiWyWDQUK8O#scrollTo=_O9W2yRrTOXn
 
 
 Dodat rutu za broj prisutnih po svakemu predavanju na određeni datum
