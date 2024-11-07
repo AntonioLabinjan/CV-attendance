@@ -25,6 +25,14 @@
     <button type="submit" style="padding: 10px 20px; font-size: 16px; color: #fff; background-color: #ffb700; border: none; border-radius: 4px; cursor: pointer; width: 100%;">Set Subject</button>
 </form>
 
+<script>
+    // Set the date input to today's date by default
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('date').value = today;
+    });
+</script>
+
 <!-- Mobile Styling -->
 <style>
     @media (max-width: 600px) {
