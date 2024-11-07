@@ -1,3 +1,5 @@
+# Ovo ima sličan efekt ko indexing u relational db-ovima
+
 import numpy as np
 import faiss
 from PIL import Image
@@ -10,7 +12,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 model, preprocess = clip.load("ViT-B/32", device)  # You can choose different models such as ViT-B/32, RN50
 
 # Image paths to compare
-image_paths = ["/content/WIN_20241106_16_51_20_Pro.jpg", "/content/WIN_20241106_16_51_12_Pro.jpg"]
+image_paths = ["/content/Nika.jpg", "/content/Romeo.png"]
 
 # Step 2: Extract embeddings for each image using CLIP
 embeddings = []
@@ -59,4 +61,6 @@ for i in range(k):
 # 20 => 12 .... 0.08069279789924622 (isti čovik, ali različita slika)
 
 
-
+# 0.35 distance za Šajine
+# 0.85802 distance za Donalda Trumpa i Romea
+# 0.87829 distance za Donalda Trummpa i Roberta
