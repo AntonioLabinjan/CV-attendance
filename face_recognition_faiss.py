@@ -12,7 +12,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 model, preprocess = clip.load("ViT-B/32", device)  # You can choose different models such as ViT-B/32, RN50
 
 # Image paths to compare
-image_paths = ["/content/Nika.jpg", "/content/Romeo.png"]
+image_paths = ["/content/slika1.jpg", "/content/slika2.png"]
 
 # Step 2: Extract embeddings for each image using CLIP
 embeddings = []
