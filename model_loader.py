@@ -2,19 +2,6 @@ import torch
 from transformers import CLIPModel, CLIPProcessor
 import os
 
-def load_clip_model(weights_path, dataset_path):
-    """
-    Load the CLIP model, processor, and fine-tuned classifier.
-
-    Parameters:
-    - weights_path (str): Path to the fine-tuned classifier weights (.pth file).
-    - dataset_path (str): Path to the dataset to determine the number of classes.
-
-    Returns:
-    - model (CLIPModel): Pre-trained CLIP model.
-    - processor (CLIPProcessor): Processor for pre-processing images and text.
-    - classifier (torch.nn.Linear): Fine-tuned classifier.
-    """
     
 def load_clip_model(weights_path, dataset_path):
     """
