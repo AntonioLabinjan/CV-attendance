@@ -1,8 +1,31 @@
+CURRENT PROBLEM: 
+- treba slike nekako spremit u bazu tako da se točno zna koja slika pripada kemu (ovaj local loading svaki put i ni nešto)
+- forši pretvorit sliku u tensor ili nešto slično i kao foreign key pratit id (ili ime) osobe kojoj pripada
+- treba nan i tablica za osobe
+- svaki put kad skeniramo lice tražimo poznato lice u bazi podataka
+- implementirat faiss za indeksirat tu bazu s licima
+- pretraživat pomoću indeksa, a ne linearno kao sada
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 OVO JE Jako BITNO: https://colab.research.google.com/drive/1ZKVMC7qs3HBf3a2hHpYBdOiWyWDQUK8O#scrollTo=_O9W2yRrTOXn
 
 
 
-## ~~TODO: IMPLEMENTIRAT LIVE DODAVANJE STUDENATA (NE PREKO SLIKE, NEGO NEKAKO AUTOMATSKI) => to će da bude zabavno hehe => forši da se opre camera feed, i da automatski slika i sprema u folder. Ili da automatski slika ili nešto~~ => did it...čak i ni bilo teško, osim par tehničkih fuck-upsa
 
 
 #### Čudan pokušaj tuninga clip-a: https://colab.research.google.com/drive/19LnwteQm3fQDx77hlOybQwT5xq5t6Yk1?usp=sharing#scrollTo=CmTFz3RObaWr
