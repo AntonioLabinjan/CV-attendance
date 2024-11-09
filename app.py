@@ -308,10 +308,6 @@ def add_student():
 def add_student_success():
     return render_template('add_student_success.html')
 
-
-known_face_encodings = []
-known_face_names = []
-
 # Ensure the 'known_faces' folder exists for storing student images
 if not os.path.exists(dataset_path):
     os.makedirs(dataset_path)
