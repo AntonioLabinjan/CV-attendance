@@ -156,7 +156,7 @@ def build_index(known_face_encodings):
 # Search for the closest face in the Faiss index
 def search_face(face_embedding, faiss_index, known_face_names):
     distances, indices = faiss_index.search(face_embedding[np.newaxis, :], 1)
-    if distances[0][0] < 0.6:  # Distance threshold for recognition
+    if distances[0][0] < 2:  # Distance threshold for recognition (bilo je 0.6)
         return known_face_names[indices[0][0]]
     return "Unknown"
 
@@ -331,8 +331,8 @@ def add_student_success():
 if not os.path.exists(dataset_path):
     os.makedirs(dataset_path)
 
-# Function to add a face encoding from a live feed frame
 '''
+# Function to add a face encoding from a live feed frame
 def add_known_face_from_frame(image_frame, name):
     global known_face_encodings, known_face_names
 
