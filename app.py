@@ -332,6 +332,7 @@ if not os.path.exists(dataset_path):
     os.makedirs(dataset_path)
 
 # Function to add a face encoding from a live feed frame
+'''
 def add_known_face_from_frame(image_frame, name):
     global known_face_encodings, known_face_names
 
@@ -348,7 +349,7 @@ def add_known_face_from_frame(image_frame, name):
     known_face_encodings.append(embedding / np.linalg.norm(embedding))
     known_face_names.append(name)
     print(f"Added face for {name} from live capture")
-
+'''
 # Route to capture live feed images and add a new student
 import numpy as np
 
