@@ -1,10 +1,6 @@
 CURRENT PROBLEM: 
-- treba slike nekako spremit u bazu tako da se točno zna koja slika pripada kemu (ovaj local loading svaki put i ni nešto)
-- forši pretvorit sliku u tensor ili nešto slično i kao foreign key pratit id (ili ime) osobe kojoj pripada
-- treba nan i tablica za osobe
-- svaki put kad skeniramo lice tražimo poznato lice u bazi podataka
-- implementirat faiss za indeksirat tu bazu s licima
-- pretraživat pomoću indeksa, a ne linearno kao sada
+Trenutno ni problema, faiss funkcionira za face recognition.
+Živo me zanima dali će delat i sutra, ili će magično krepat priko noći :)
 
 
 
