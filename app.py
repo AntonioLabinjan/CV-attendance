@@ -23,6 +23,9 @@ app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 # SendGrid API Key
 sendgrid_api_key = os.getenv('SENDGRID_API_KEY')
 
+import os
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+
 
 
 # Init model
@@ -118,7 +121,7 @@ def add_known_face(image_path, name):
     with torch.no_grad():
         outputs = model.get_image_features(**inputs)
     embedding = outputs.cpu().numpy().flatten()
-    known_face_encodings.append(embedding / np.linalg.norm(embedding))  # Normalize the embedding
+    known_face_encodings.append(embedding / np.linalg.norm(embedding))  # Normalize embedding
     known_face_names.append(name)
     print(f"Added face for {name} from {image_path}")
 
@@ -139,19 +142,35 @@ def load_known_faces():
     print(f"Known face names: {known_face_names}")
 
 # Load known faces at startup
+
+
+
+
+def build_index(known_face_encodings):
+    known_face_encodings = np.array(known_face_encodings)
+    dimension = known_face_encodings.shape[1]  # Size of each embedding vector
+    faiss_index = faiss.IndexFlatL2(dimension)  # L2 distance metric
+    faiss_index.add(known_face_encodings)  # Add all known face encodings to the index
+    return faiss_index
+
+# Search for the closest face in the Faiss index
+def search_face(face_embedding, faiss_index, known_face_names):
+    distances, indices = faiss_index.search(face_embedding[np.newaxis, :], 1)
+    if distances[0][0] < 0.6:  # Distance threshold for recognition
+        return known_face_names[indices[0][0]]
+    return "Unknown"
+
 load_known_faces()
+
+known_face_encodings = np.array(known_face_encodings)  # Ensure encodings are a numpy array
+faiss_index = build_index(known_face_encodings)
+
 
 # Initialize the webcam
 video_capture = cv2.VideoCapture(0)
 
 # Face detection using Haar Cascade
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-
-
-
-
-
-
 
 # Inicijaliziranje atributa za trenutnu prisutnost
 current_subject = None
@@ -331,6 +350,35 @@ def add_known_face_from_frame(image_frame, name):
     print(f"Added face for {name} from live capture")
 
 # Route to capture live feed images and add a new student
+import numpy as np
+
+def add_known_face_from_frame(image_frame, name):
+    global known_face_encodings, known_face_names
+
+    # Convert frame to RGB and process it
+    image_rgb = cv2.cvtColor(image_frame, cv2.COLOR_BGR2RGB)
+    inputs = processor(images=image_rgb, return_tensors="pt")
+
+    # Generate the image feature embedding
+    with torch.no_grad():
+        outputs = model.get_image_features(**inputs)
+    
+    # Normalize the embedding
+    embedding = outputs.cpu().numpy().flatten()
+    normalized_embedding = embedding / np.linalg.norm(embedding)
+    
+    # If `known_face_encodings` is a list, append directly
+    if isinstance(known_face_encodings, list):
+        known_face_encodings.append(normalized_embedding)
+    else:
+        # If it's a numpy array, use numpy.vstack to add the new embedding
+        known_face_encodings = np.vstack([known_face_encodings, normalized_embedding])
+
+    # Append the name
+    known_face_names.append(name)
+    print(f"Added face for {name} from live capture")
+
+# Route to capture live feed images and add a new student
 @app.route('/add_student_live', methods=['GET', 'POST'])
 def add_student_live():
     if request.method == 'POST':
@@ -372,6 +420,7 @@ def add_student_live():
         return redirect(url_for('add_student_success', name=name))
     
     return render_template('add_student_live.html')
+
 
 
 
@@ -548,7 +597,6 @@ def perform_liveness_check(frame):
 def generate_frames():
     cap = cv2.VideoCapture(0)
     old_gray = None
-    global liveness_frame_count
 
     if not cap.isOpened():
         print("Error: Camera could not be opened.")
@@ -561,35 +609,34 @@ def generate_frames():
             continue
 
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        faces = detect_face(frame)
+        faces = detect_face(frame)  # This function should detect faces and return bounding boxes
 
         if old_gray is None:
             old_gray = gray.copy()
 
-        if check_liveness_over_time(frame, faces, old_gray, gray):
+        if check_liveness_over_time(frame, faces, old_gray, gray):  # Liveness check
             cv2.putText(frame, "Liveness Confirmed", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-            # Proceed with facial recognition and attendance logging
+            # Process each face found
             for (x, y, w, h) in faces:
                 face_image = frame[y:y+h, x:x+w]
-                gray_face = gray[y:y+h, x:x+w]
-
+                
+                # Convert face image to RGB and extract embedding
                 face_image_rgb = cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB)
                 inputs = processor(images=face_image_rgb, return_tensors="pt")
                 with torch.no_grad():
                     outputs = model.get_image_features(**inputs)
                 face_embedding = outputs.cpu().numpy().flatten()
-                face_embedding /= np.linalg.norm(face_embedding)
+                face_embedding /= np.linalg.norm(face_embedding)  # Normalize embedding
 
-                if len(known_face_encodings) == 0:
-                    name = "Unknown"
+                # Use Faiss for efficient face search
+                if len(known_face_encodings) > 0:
+                    name = search_face(face_embedding, faiss_index, known_face_names)
+                    if name != "Unknown":
+                        frame = log_attendance(name, frame)  # Log attendance if face is recognized
                 else:
-                    distances = np.linalg.norm(known_face_encodings - face_embedding, axis=1)
-                    min_distance_index = np.argmin(distances)
                     name = "Unknown"
-                    if distances[min_distance_index] < 0.6:
-                        name = known_face_names[min_distance_index]
-                        frame = log_attendance(name, frame)
 
+                # Draw rectangle and label on the frame
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
                 cv2.putText(frame, name, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
         else:
@@ -597,13 +644,13 @@ def generate_frames():
 
         old_gray = gray.copy()  # Update old frame for the next iteration
 
+        # Encode frame to JPEG format for streaming
         ret, buffer = cv2.imencode('.jpg', frame)
         frame = buffer.tobytes()
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
     cap.release()
-
 
 
 @app.route('/video_feed')
