@@ -763,31 +763,42 @@ def download_attendance():
     output = io.StringIO()
     writer = csv.writer(output)
     
-    # Initialize previous subject to keep track of subject changes
+    # Initialize previous subject and student count
     previous_subject = None
+    student_count = 0
 
-    # Headeri
-    writer.writerow(['Subject', 'Name', 'Date', 'Time'])
+    # Headers
+    writer.writerow(['Subject', 'Name', 'Date', 'Time', 'Number of students'])
 
-    #  CSV data grouped by subject
+    # Grouped CSV data by subject
     for record in records:
         subject, name, date, time = record
         
         if subject != previous_subject:
+            # Write the student count for the previous subject, if exists
             if previous_subject is not None:
+                writer.writerow(['', '', '', '', student_count])  # student count row
                 writer.writerow([])  # empty row between each subject
-            writer.writerow([subject])  # subject name stavimo za header
+            # Write the new subject name and reset student count
+            writer.writerow([subject])  # subject header
             previous_subject = subject
-        
+            student_count = 0
+
+        # Write the student's attendance record
         writer.writerow(['', name, date, time])
-    
+        student_count += 1  # Increment student count for this subject
+
+    # Write student count for the last subject
+    if previous_subject is not None:
+        writer.writerow(['', '', '', '', student_count])
+
     # Seek to the beginning of the stream
     output.seek(0)
     
     return Response(output, mimetype="text/csv", headers={"Content-Disposition": "attachment;filename=attendance.csv"})
 
+# Isti vrag ko ovo gore, samo se još pošalje na mail
 
-# isti vrag ko ovo gore, samo još šibnemo na mail
 @app.route('/download_and_email')
 def download_and_email_attendance():
     conn = sqlite3.connect('attendance.db')
@@ -800,19 +811,29 @@ def download_and_email_attendance():
     writer = csv.writer(output)
 
     previous_subject = None
+    student_count = 0
 
-    writer.writerow(['Subject', 'Name', 'Date', 'Time'])
+    writer.writerow(['Subject', 'Name', 'Date', 'Time', 'Number of students'])
 
     for record in records:
         subject, name, date, time = record
 
         if subject != previous_subject:
+            # Write the student count for the previous subject, if exists
             if previous_subject is not None:
-                writer.writerow([])  
-            writer.writerow([subject]) 
+                writer.writerow(['', '', '', '', student_count])  # student count row
+                writer.writerow([])  # empty row between each subject
+            # Write the new subject name and reset student count
+            writer.writerow([subject])  # subject header
             previous_subject = subject
+            student_count = 0
 
         writer.writerow(['', name, date, time])
+        student_count += 1  # Increment student count for this subject
+
+    # Write student count for the last subject
+    if previous_subject is not None:
+        writer.writerow(['', '', '', '', student_count])
 
     output.seek(0)
 
