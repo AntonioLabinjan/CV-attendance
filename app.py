@@ -610,13 +610,16 @@ def generate_frames():
             continue
 
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        faces = detect_face(frame)  # This function should detect faces and return bounding boxes
+        faces = detect_face(frame)  
 
         if old_gray is None:
             old_gray = gray.copy()
 
+        cv2.putText(frame, "Move your head around", (50, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
+
+
         if check_liveness_over_time(frame, faces, old_gray, gray):  # Liveness check
-            cv2.putText(frame, "Liveness Confirmed", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            cv2.putText(frame, "Liveness Confirmed", (50, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
             # Process each face found
             for (x, y, w, h) in faces:
                 face_image = frame[y:y+h, x:x+w]
@@ -641,7 +644,7 @@ def generate_frames():
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
                 cv2.putText(frame, name, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
         else:
-            cv2.putText(frame, "Liveness Failed: No Movement Detected", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            cv2.putText(frame, "Liveness Failed: No Movement Detected", (50, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
         old_gray = gray.copy()  # Update old frame for the next iteration
 
