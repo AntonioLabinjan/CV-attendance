@@ -94,8 +94,6 @@ pefile
 pillow
 plyer
 protobuf
-PyAudio
-PyAutoGUI
 pycparser
 pycryptodomex
 pygame
