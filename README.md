@@ -1,3 +1,7 @@
+FORŠI ĆE TREBAT MALO POŠTIMAT KAKO SE APP VRTI (PORT I TO..za hostat)
+
+
+
 CURRENT PROBLEM: 
 Trenutno ni problema, faiss funkcionira za face recognition.
 Živo me zanima dali će delat i sutra, ili će magično krepat priko noći :)
