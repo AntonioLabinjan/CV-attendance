@@ -1,6 +1,6 @@
 FORŠI ĆE TREBAT MALO POŠTIMAT KAKO SE APP VRTI (PORT I TO..za hostat)
 
-
+Provat spremit known encoding tensore u neki csv ili neki klinac
 
 CURRENT PROBLEM: 
 Trenutno ni problema, faiss funkcionira za face recognition.
