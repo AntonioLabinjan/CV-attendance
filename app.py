@@ -1,19 +1,22 @@
+# iz fajla imports importamo sve (to san napravija da niman 50 linija importova na vr)
 from imports import *
 
-
+# iz fajla db startup importamo funkciju za kreiranje baze podataka i pozivamo je da se baza napravi
 from db_startup import create_db
 create_db()
 
+# iz fajlova za loading modela pozivamo funkcija za loading. Učitavamo clip model za face embeddingse i model za hateful speech text multiclassification
 from model_loader import load_clip_model
 from load_post_check import load_model_and_tokenizer
 
-# Load-an stvari iz env fajla
+# Load-an stvari iz env fajla (api ključeve, passworde i te sličen stvari)
 load_dotenv()
 
+# inicijaliziramo app i definiramo da je to flask aplikacija + dohvaćamo secret key iz .env (za session management)
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
 
-# Config za email api
+# Config za email api (isto sve vadimo iz env)
 app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
 app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT'))
 app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS') == 'True'
@@ -23,12 +26,12 @@ app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 # SendGrid API Key
 sendgrid_api_key = os.getenv('SENDGRID_API_KEY')
 
-import os
+# ovo je da se ne zbrejka sve ako slučajno 2 puta iniciramo tensorflow
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 
 
-# Init model
+# Init modela. Učitavamo dataset i weightove. Model se svaki put fine-tunea na naše nove podatke (mada to ni onaj classic fine tuning di mi mijenjamo neke parametere. On sve dela umisto nas :)
 weights_path = "C:/Users/Korisnik/Desktop/WORKING_CV_ATTENDANCE/fine_tuned_classifier.pth"
 dataset_path = "C:/Users/Korisnik/Desktop/WORKING_CV_ATTENDANCE/known_faces"
 model, processor, classifier = load_clip_model(weights_path, dataset_path)
@@ -36,30 +39,35 @@ model, processor, classifier = load_clip_model(weights_path, dataset_path)
 # In-memory storage za lica; ovo čak i ne triba spremat u bazu jer: 
                                     # a) svaki put pozovemo funkciju za loading usera kad palimo app i vjerojatno je isto brzo dali ih učita ovako, ili selektira iz baze
                                     # b) neman ni približnu ideju kako vraga se slike moru spremit u sql bazu...vjerojatno bi trebalo setupirat neki firebase samo za slike, ali dela i ovako...ako dela, ne tičen niš
+# encodings su za tensore lica(1 slika => 1 tensor). Svaka klasa ima više tensora. Usporedimo tensor detected lica s tensorima koje imamo poznate
 known_face_encodings = []
 known_face_names = []
 
-# Track attendance for the current session
+# Pratimo koje ljude smo logali u current sessionu. Više ga ne koristin; jer nam ne odgovara da je stvar set; ne bi bilo moguće logat istega čovika više puta u 1 sesiji (a treba mi to)
 logged_names = set()
 
 
-# ovo bi bilo dobro spremit u .env fajl, ali to ću ben delat
+# ovo bi bilo dobro spremit u .env fajl, ali to ću ben delat (spremija san)
 #app.secret_key = 'DO_NOT_VISIT_GRMIALDA' # RIJEŠENO
 
 
 # Flask-Login setup
+# flask ima svoj pre-made library za login management. Samo ga intanciramo, inicijaliziramo i postavimo da ćemo login obavljat na view-u koji se zove login
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 # Model za usera
+# User je klasa. Svaki ima id, username, password i email
 class User:
+    # konstruktor
     def __init__(self, id, username, password, email):
         self.id = id
         self.username = username
         self.password = password
         self.email = email
 
+    # Inače se moru dodat i složenije provjere, ali meni to ni toliko bitno. Pretpostavljamo da je svaki user aktivan, autentificiran i da ni anoniman (to su default properties čim se ulogira)
     # Flask-Login needs these properties to work correctly
     @property
     def is_active(self):
@@ -84,19 +92,25 @@ class User:
 # In-memory user storage (can be replaced with a database)
 # users = {} OVO MI VIŠE NE TRIBA
 
+
+# koristimo login manager za loading korisnika
+# prosljedimo id u funkciju, spajamo se na bazu, cursor izvršava query na bazu tako da dohvaća onega korisnika koji ima odgovarajući id
 @login_manager.user_loader
 def load_user(user_id):
     conn = sqlite3.connect('attendance.db')
     c = conn.cursor()
     c.execute("SELECT * FROM users WHERE id = ?", (user_id,))
+    # kursor dohvaća prvega usera s odgovarajućim id-jem pomoću fetchone (doduše, ne more imat 2 usera, isti id, ali čisto preventivno)
     user = c.fetchone()
+    # zatvaramo konekciju da se sve ne zblesira
     conn.close()
 
+    # ako smo našli korisnika s tin id-jem, dohvaćamo atribute indeksirano po redu kako smo definirali u klasi
     if user:
         return User(id=user[0], username=user[1], password=user[2], email=user[3])
     return None
 
-
+# iniciramo mail server (ovo doli je viška ja mislin, jer ima u env)
 mail = Mail()
 
 
@@ -111,24 +125,37 @@ mail = Mail(app)
 
 
 
-# Function to add a known face
+# Function to add a known face.
+# Dodaje sliku po sliku. Prosljeđuje putanju do slike i ime klase(osobe)
 def add_known_face(image_path, name):
-    image = cv2.imread(image_path)
+    # učitvamo sliku iz putanje koju smo prosljedili
+    image = cv2.imread(image_path) 
+    # ako je ni (None=> nema je; nismo je našli) dajemo value error 
     if image is None:
         raise ValueError(f"Image at path {image_path} not found.")
+    # ako je ima, konvertiramo je u drugi format da clip more delat s njon
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    # processor uzima rgb slike i pretvara ih u tensore koji su input za clip model
     inputs = processor(images=image_rgb, return_tensors="pt")
     with torch.no_grad():
+        # uzimamo tensore i izvlačimo featurse iz njih tj. embeddinge
         outputs = model.get_image_features(**inputs)
+    # pretvorimo u numpy array
     embedding = outputs.cpu().numpy().flatten()
-    known_face_encodings.append(embedding / np.linalg.norm(embedding))  # Normalize embedding
+    # normaliziranje za lakšu usporedbu
+    known_face_encodings.append(embedding / np.linalg.norm(embedding))  
+    # appendamo u listu
     known_face_names.append(name)
     print(f"Added face for {name} from {image_path}")
 
 # Load all known faces from the 'known_faces' directory
 def load_known_faces():
+    # za svako ime(subfolder) u known_faces folderu 
     for student_name in os.listdir('known_faces'):
+        # stvaramo dir za svakega studenta
         student_dir = os.path.join('known_faces', student_name)
+        # ako je to direktorij, dodaj sve fajlove iz direktorija u aplikaciju
+        # za svaku sliku u svakemu direktoriju pozivamo add_known face od gore
         if os.path.isdir(student_dir):
             for filename in os.listdir(student_dir):
                 image_path = os.path.join(student_dir, filename)
@@ -141,35 +168,46 @@ def load_known_faces():
     print(f"Loaded {len(known_face_encodings)} known face encodings")
     print(f"Known face names: {known_face_names}")
 
-# Load known faces at startup
-
-
-
-
+# Build an index for Facebook AI Similarity Search (FAISS) using known face encodings
 def build_index(known_face_encodings):
+    # Pretvaramo listu known_face_encodings u numpy array za rad s FAISS-om
     known_face_encodings = np.array(known_face_encodings)
-    dimension = known_face_encodings.shape[1]  # Size of each embedding vector
-    faiss_index = faiss.IndexFlatL2(dimension)  # L2 distance metric
-    faiss_index.add(known_face_encodings)  # Add all known face encodings to the index
+    
+    # Dobivamo dimenziju svakega embedding vektora (broj feturesa po vektoru)
+    dimension = known_face_encodings.shape[1]
+    
+    # Kreiramo FAISS index koji koristi L2  (Euclidean distance) => korijen od kvadrirane sume razlika podudarnih elemenata u 2 vektora 
+    faiss_index = faiss.IndexFlatL2(dimension)
+    
+    # Dodajemo sve poznate face encodings u FAISS index
+    faiss_index.add(known_face_encodings)
+    
+    # Vraćamo izgrađeni FAISS index
     return faiss_index
 
+
 # Search for the closest face in the Faiss index
+# sad koristimo faiss index za pretraživanje. uzmemo trenutni embeding koji smo ulovili na detekciji, pretražujemo faiss index da bimo našli closest match
+# vraćamo closest match i klasificiramo detektirano lice kao najbližu klasu
 def search_face(face_embedding, faiss_index, known_face_names):
     distances, indices = faiss_index.search(face_embedding[np.newaxis, :], 1)
     if distances[0][0] < 2:  # Distance threshold for recognition (bilo je 0.6)
         return known_face_names[indices[0][0]]
     return "Unknown"
 
+# pozivamo funkciju za učitavanje svih lica/embeddinga
 load_known_faces()
 
+# pretvorimo lica u numpy array za bit sigurni u buildamo index
 known_face_encodings = np.array(known_face_encodings)  # Ensure encodings are a numpy array
 faiss_index = build_index(known_face_encodings)
 
 
-# Initialize the webcam
+# Initialize the webcam. Stavimo nulu za koristit defaultnu kameru (ako smo toliko luksuzni da imamo više kamera, moremo stavit 1,2,3 itd. ;)
 video_capture = cv2.VideoCapture(0)
 
 # Face detection using Haar Cascade
+# ovo ubacimo da detektira lica i crta bounding boxeve oko njih
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
 # Inicijaliziranje atributa za trenutnu prisutnost
@@ -195,39 +233,37 @@ def validate_password(password):
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
+    # get je jer dohaćamo formular, post je šaljemo zahtjev za signup
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
         repeat_password = request.form['repeat_password']
         email = request.form['email']
-
-        # Check if passwords match
+        
+        # standard validation
         if password != repeat_password:
             flash("Passwords do not match. Please try again.", "error")
             return redirect(url_for('signup'))
 
-        # Validate password
         password_error = validate_password(password)
         if password_error:
             flash(password_error, "error")
             return redirect(url_for('signup'))
 
-        # Check if username already exists
         try:
             conn = sqlite3.connect('attendance.db')
             c = conn.cursor()
 
-            # Check if username or email already exists
             c.execute("SELECT * FROM users WHERE username = ? OR email = ?", (username, email))
             if c.fetchone() is not None:
                 flash("Username or email already taken. Please choose a different one.", "error")
                 conn.close()
                 return redirect(url_for('signup'))
 
-            # Hash the password
+            # Hashiranje
             hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
 
-            # Insert new user into the database
+            # Save to db
             c.execute("INSERT INTO users (username, password, email) VALUES (?, ?, ?)",
                       (username, hashed_password, email))
             conn.commit()
@@ -243,7 +279,7 @@ def signup():
     return render_template('signup.html')
 
 
-
+# ovo samo uzima naš input u login formu i provjerava dali se podudara s nekin usernameon i dali se hashed passwordi poklapaju
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -253,11 +289,11 @@ def login():
         conn = sqlite3.connect('attendance.db')
         c = conn.cursor()
         c.execute("SELECT * FROM users WHERE username = ?", (username,))
-        user = c.fetchone()  # Fetches user row
+        user = c.fetchone()  # Fetches user row (dohvati 1 usera)
         conn.close()
 
         if user:
-            # User is found, verify the password
+            # User is found
             user_id, db_username, db_password, db_email = user
             if check_password_hash(db_password, password):
                 # Successful login
@@ -273,18 +309,22 @@ def login():
 @app.route('/logout')
 @login_required
 def logout():
+    # samo call-a ugrađenu funkciju za logout
     logout_user()
     return redirect(url_for('login'))
 
 @app.route('/set_subject', methods=['GET', 'POST'])
-@login_required
+@login_required # moramo bit ulogirani za pristupit ruti
 def set_subject():
+    # ove varijable su globalne jer želimo da ih se mora čitat/dohvaćat i van funkcije (tribat će nan kad budemo logali attendance)
     global current_subject, attendance_date, start_time, end_time
+    # ako šaljemo post request, spremamo u varijable ovo ča smo prosljedili kroz req. form
     if request.method == 'POST':
         current_subject = request.form['subject']
         attendance_date = request.form['date']
         start_time = request.form['start_time']
         end_time = request.form['end_time']
+        # renderiramo template s dodanima podacima
         return render_template('set_subject_success.html', 
                                subject=current_subject, 
                                date=attendance_date, 
@@ -292,46 +332,56 @@ def set_subject():
                                end_time=end_time)
     return render_template('set_subject.html')
 
+# provjera dali je trenutno vrijeme unutar intervala koji smo definirali za predavanje
 def is_within_time_interval():
+    # u now spremamo trenutni datum i vrime
     now = datetime.now()
+    # iz now extractamo posebno datum i posbno vrime
     current_time = now.strftime("%H:%M")
     current_date = now.strftime("%Y-%m-%d")
+    # vraća true ako smo unutar intervala, odnosno false ako nismo
     return (current_date == attendance_date and 
             start_time <= current_time <= end_time)
 
+# path do dataseta
 dataset_path = "c:/Users/Korisnik/Desktop/WORKING_CV_ATTENDANCE/known_faces"
 
+# ruta za dodavanje studenta 
 @app.route('/add_student', methods=['GET', 'POST'])
+# moramo bit ulogirani
 @login_required
 def add_student():
+    # dohvaćamo ime iz requesta i izlistavamo sve slike koje smo poslali kroz request (1 je minimum, al more i više)
     if request.method == 'POST':
         name = request.form['name']
         images = request.files.getlist('images')
         
-        # Novi subfolder za nove studente
+        # Novi subfolder za nove studente (4each student se dela folder)
         student_dir = os.path.join('known_faces', name)
         os.makedirs(student_dir, exist_ok=True)
-
         for image in images:
-            # Add image in new subfolder
+            # Dodajemo svaku sliku u studentov folder
             image_path = os.path.join(student_dir, image.filename)
             image.save(image_path)
+            # pozivamo add_known_face za svaku sliku
             add_known_face(image_path, name)
         
+        # dodajemo dinamički parametar name u template za success
         return render_template('add_student_success.html', name=name)
 
     return render_template('add_student.html')
 
-# Route to confirm success
+# Route to confirm success => samo izrenderiramo stranicu ako uspije
 @app.route('/add_student_success')
 def add_student_success():
     return render_template('add_student_success.html')
 
-# Ensure the 'known_faces' folder exists for storing student images
+# Ako known faces slučajno ne postoje, napravimo ih
 if not os.path.exists(dataset_path):
     os.makedirs(dataset_path)
 
 '''
+# OVO NI VALJALO; A IZGLEDALO JE BAŠ DOBRO :(
 # Function to add a face encoding from a live feed frame
 def add_known_face_from_frame(image_frame, name):
     global known_face_encodings, known_face_names
@@ -351,9 +401,10 @@ def add_known_face_from_frame(image_frame, name):
     print(f"Added face for {name} from live capture")
 '''
 # Route to capture live feed images and add a new student
-import numpy as np
+# Uglavnon, ovo je isti vrag kao ono static dodavanje, samo lovimo iz kamere
 
 def add_known_face_from_frame(image_frame, name):
+    # koristimo one iste encodinge i nameove od prije
     global known_face_encodings, known_face_names
 
     # Convert frame to RGB and process it
@@ -380,6 +431,7 @@ def add_known_face_from_frame(image_frame, name):
     print(f"Added face for {name} from live capture")
 
 # Route to capture live feed images and add a new student
+# Isto kao i ono static dodavanje, samo lovimo slike preko kamere
 @app.route('/add_student_live', methods=['GET', 'POST'])
 def add_student_live():
     if request.method == 'POST':
@@ -390,34 +442,36 @@ def add_student_live():
         # Start webcam capture
         cap = cv2.VideoCapture(0)
         frame_count = 0
-        required_frames = 25  # Number of frames to capture
-
+        required_frames = 25  # Number of frames to capture => 25 po klasi/osobi (more više, more manje)
+        # otpri camera capture i lovi frameove sve dok ih više nema (ugasimo kameru ili ima dovoljno frejmova); onda samo udri break
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
                 break
 
-            # Display live video feed
+            # Display live video feed 
             cv2.imshow("Capture Face - Press 'q' to Quit", frame)
 
-            # Capture every frame
+            # Capture every frame => sve dok ih je manje od 25 (required)
             if frame_count < required_frames:
                 # Save frame in student's directory
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                frame_path = os.path.join(student_dir, f"{name}_{timestamp}_{frame_count}.jpg")
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S") # => dohvati datum i vrime za timestamp za naziv slike
+                frame_path = os.path.join(student_dir, f"{name}_{timestamp}_{frame_count}.jpg") # nazovi sliku ime_timstamp_redni_broj_framea
                 cv2.imwrite(frame_path, frame)
                 
-                # Process and save the embedding
+                # Process and save the embedding = > spremi tensor i povećaj frame count za 1
                 add_known_face_from_frame(frame, name)
                 frame_count += 1
             
-            # Stop capture if 'q' is pressed or required frames reached
+            # Killaj petlju ako ima dovoljno slika ili smo quitali s q
             if cv2.waitKey(1) & 0xFF == ord('q') or frame_count >= required_frames:
                 break
 
+        # oslobodi kameru, zapri detection window
         cap.release()
         cv2.destroyAllWindows()
 
+        # isto ko manualno dodavanje
         return redirect(url_for('add_student_success', name=name))
     
     return render_template('add_student_live.html')
@@ -426,12 +480,13 @@ def add_student_live():
 
 
 
-
-def send_attendance_notification(name, date, time, subject):
+# koristimo onaj mail server koji smo definirali gore
+def send_attendance_notification(name, date, time, subject): # => ovi podaci nas zanimaju (postavili smo ih kroz set subject i ubacit ćemo ih u mail)
     message = Mail(
+        # izgled maila
         from_email='attendance.logged@gmail.com', 
         to_emails='alabinjan6@gmail.com', # napravit neki official mail za ovaj app da ne koristin svoj mail
-        subject=f'Attendance Logged for {name}',
+        subject=f'Attendance Logged for {name}', 
         plain_text_content=f'Attendance for {name} in {subject} on {date} at {time} was successfully logged.'
     )
     
@@ -440,22 +495,18 @@ def send_attendance_notification(name, date, time, subject):
         #sendgrid_api_key = os.getenv('SENDGRID_API_KEY')
         sg = SendGridAPIClient(os.getenv('SENDGRID_API_KEY'))
         response = sg.send(message)
+        # debug ako sendgrid ne dela
         print(f"Email sent: {response.status_code}")
-        print(f"Response body: {response.body}")  # Debug
+        print(f"Response body: {response.body}")  
     except Exception as e:
         print(f"Error sending email: {str(e)}")
 
 
 
-import cv2
-import numpy as np
-import sqlite3
-from datetime import datetime, timedelta
-
-# Load Haar cascade for face detection
+# Load Haar cascadesa za face detection
 eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')
 
-# Global variables
+# Global varijable za attendance ( ovo je viška, već iman gori)
 current_subject = None
 attendance_date = None
 start_time = None
@@ -463,12 +514,19 @@ end_time = None
 
 def detect_face(frame):
     """Detect faces in the frame using Haar cascades."""
+    # Convert the frame (which is in BGR color) to grayscale
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    # Haar Cascade classifier detektira lica
+    # `scaleFactor` skalira veličinu da svako detektirano lice bude cca isto 
+    # `minNeighbors` osigurava da svako lice mora bit u bar 5 frameova da bi ga priznalo 
+    # `minSize` osigurava minimalnu veličinu
     faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+    # vraća koordinate svakega lica pomoću bounding boxa
     return faces
 
+
 def detect_eye_movement(frame, face):
-    """Check for eye movement (blinking) by detecting eyes."""
+    # lovimo kkordinate lica i oči. Ako ulovi 2 oka, pretpostavlja da smo čovik
     (x, y, w, h) = face
     roi_gray = frame[y:y + h, x:x + w]
     eyes = eye_cascade.detectMultiScale(roi_gray)
@@ -476,12 +534,14 @@ def detect_eye_movement(frame, face):
     # Check if two eyes are detected for liveness
     return len(eyes) >= 2  # Live face detected (eyes are open)
 
+# provjerava dali trepćemo
 def detect_eye_blink(face, gray_frame):
     (x, y, w, h) = face
     roi_gray = gray_frame[y:y+h, x:x+w]
     eyes = eye_cascade.detectMultiScale(roi_gray)
     return len(eyes) < 2  # Eyes are closed if fewer than 2 eyes are detected
 
+# provjerava dali mičemo glavu (dali ima neke razlike u koordinatama između frameova)
 def detect_head_movement(old_gray, new_gray, faces):
     for face in faces:
         (x, y, w, h) = face
@@ -489,67 +549,79 @@ def detect_head_movement(old_gray, new_gray, faces):
         roi_new = new_gray[y:y+h, x:x+w]
         difference = cv2.absdiff(roi_old, roi_new)
         non_zero_count = np.count_nonzero(difference)
-        if non_zero_count > 200:  # Threshold for movement
+        if non_zero_count > 50:  # Threshold for movement
             return True
     return False
 
-liveness_frame_count = 0
+liveness_frame_count = 0 # init varijable
 LIVENESS_FRAMES_THRESHOLD = 5  # Number of consecutive frames for liveness confirmation
 
+# za svako lice provjeravamo dali je pomicalo oči i glavu; ako je, povećamo liveness frame count
 def check_liveness_over_time(frame, faces, old_gray, new_gray):
     global liveness_frame_count
+# delaj provjere za sva detektirana lica   
     for face in faces:
+        # varijable za treptanje i micanje glave (more bit true/false)
         eyes_closed = detect_eye_blink(face, new_gray)
         head_moved = detect_head_movement(old_gray, new_gray, faces)
         
-        if not eyes_closed and head_moved:  # Both conditions should be true for liveness
+
+        if not eyes_closed and head_moved:  # oba uvjeta moraju bit zadovoljena da se frame prizna ko live frame
             liveness_frame_count += 1
         else:
-            liveness_frame_count = 0  # Reset if liveness is not detected in a frame
+            liveness_frame_count = 0  
     
     if liveness_frame_count >= LIVENESS_FRAMES_THRESHOLD:
-        return True  # Confirm liveness after consistent detection over frames
+        return True  # ako liveness pasa u dovoljno frameova, smatramo osobu živom
     return False
 
 async def check_liveness(frame, faces):
-    """Check if the detected face is live."""
+    # za svako detektirano lice provjeravamo liveness. Stavljeno je u async s ciljen da dela bar malo brže
     for face in faces:
         if detect_eye_movement(frame, face):
-            return True  # Live face detected
-    return False  # Spoof detected
+            return True  # Live face 
+    return False  # Spoof 
 
+# e ovo je zabavno
 def log_attendance(name, frame):
-    """Log attendance if the subject is set and current time is within the allowed interval."""
+    # ovo je globalna varijable jer smo je postavili u drugoj funkciji (set subject i dohvaćamo je tu). Svako loganje attendancea će bit za točno taj subject ako je postavljen
     global current_subject, attendance_date, start_time, end_time
+    # ako nismo postavili predmet ili ako nismo unutar intervala (starttime > x && x < endtime)
     if current_subject is None or not is_within_time_interval():
         print("Subject is not set or current time is outside of allowed interval. Attendance not logged.")
         return frame
 
+    # lovimo trenutni datum i vrijeme
     now = datetime.now()
     date = now.strftime("%Y-%m-%d")
     time = now.strftime("%H:%M:%S")
 
-    # Create datetime object for start time
+    # Create datetime object for start time => kad počinje loganje attendancea
     start_time_obj = datetime.strptime(f"{attendance_date} {start_time}", "%Y-%m-%d %H:%M")
 
-    # Tolerate up to 15 minutes delay (academic quarter)
+    # Toleriramo do 15 minuta kašnjenja (starttime + interval od 14 minuta)
     late_time_obj = start_time_obj + timedelta(minutes=14)
 
-    # Check if the current time is late
+    # Check if the current time is late => dali je trenutno vrijeme veće od starttimea za više od late_time_obj(a.k.a 14 minuta)
     if now > late_time_obj:
+        # za pisat po camera captureu; niš bistro
         cv2.putText(frame, f"Late Entry: {name}", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
+    # takamo se na bazu i inicijaliziramo kursor
     conn = sqlite3.connect('attendance.db')
     c = conn.cursor()
 
+    # provjeravamo dali već postoji u tablici attendance zapis za to ime, taj datum i taj predmet i fetchamo prvi zakov zapis
     c.execute("SELECT * FROM attendance WHERE name = ? AND date = ? AND subject = ?", (name, date, current_subject))
     existing_entry = c.fetchone()
 
+    # ako postoji, vraćamo alert da je prisutnost već loggana
     if existing_entry:
         print(f"Attendance for {name} on {date} for subject {current_subject} is already logged.")
         return frame
 
-    # Late is 1 if we are late, if not then 0
+    # ako ne postoji , pozivamo cursor insert i dodamo zapis
+    # Late is 1 if we are late, if not then 0 => bool flag za provjeru
     c.execute("INSERT INTO attendance (name, date, time, subject, late) VALUES (?, ?, ?, ?, ?)", 
               (name, date, time, current_subject, 1 if now > late_time_obj else 0))
     conn.commit()
@@ -557,6 +629,7 @@ def log_attendance(name, frame):
 
     print(f"Logged attendance for {name} on {date} at {time} for subject {current_subject}.")
 
+    # poziva se funkcija za slanje maila
     send_attendance_notification(name, date, time, current_subject)
 
     return frame
@@ -564,8 +637,9 @@ def log_attendance(name, frame):
 def perform_liveness_check(frame):
     """Capture video from the camera and perform liveness detection."""
     cap = cv2.VideoCapture(0)  # Use the primary camera
-    live_face_detected = False
+    live_face_detected = False # varijable je po defaultu false, pa je hitimo na true ako detektiramo živost
 
+    # opet ona fora da detecta, sve dok više ne detecta
     ret, frame = cap.read()
     if not ret:
         cap.release()
@@ -582,6 +656,7 @@ def perform_liveness_check(frame):
         # Draw a bounding box around the detected face
         cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)  # Blue box
 
+        # dajemo labelu i print
         if is_alive:
             live_face_detected = True
             print("OK, real")
@@ -592,52 +667,64 @@ def perform_liveness_check(frame):
 
     cap.release()
 
+    # daje true/false i o temu ovisi dal ćemo ga spremit ili ne
     return live_face_detected
 
 # COMPUTER VISION MAGIJA
 def generate_frames():
+    # otvara kameru
     cap = cv2.VideoCapture(0)
+    # ovo je za početak none, jer nema još nikakovih frameova
     old_gray = None
 
+    # ako kamera ne dela
     if not cap.isOpened():
         print("Error: Camera could not be opened.")
         return
 
+    # sve dok kamera dela, lovi frameove
     while True:
         ret, frame = cap.read()
         if not ret:
             print("Warning: Couldn't grab frame. Retrying...")
             continue
-
+        # pretvori ih u odgovarajući format
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         faces = detect_face(frame)  
 
+        # za početak u old_gray spremimo kopiju prvega i onda iterativno spremamo najzadnji
         if old_gray is None:
             old_gray = gray.copy()
 
+        # samo print korisniku da mora pomicat glavu
         cv2.putText(frame, "Move your head around", (50, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
 
-
-        if check_liveness_over_time(frame, faces, old_gray, gray):  # Liveness check
+        # ako liveness potvrda pasa ok
+        if check_liveness_over_time(frame, faces, old_gray, gray):  
             cv2.putText(frame, "Liveness Confirmed", (50, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-            # Process each face found
+            # Procesiramo sva lica ulovljena na capture-u (dela i za više lica istovremeno, ali najbolje je kad je 1 po 1)
+            # extractamo frameove s licima preko koordinata
             for (x, y, w, h) in faces:
                 face_image = frame[y:y+h, x:x+w]
                 
-                # Convert face image to RGB and extract embedding
+                # Convertamo image u RGB i extractamo embedding
                 face_image_rgb = cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB)
+                # pretvaramo u tensor
                 inputs = processor(images=face_image_rgb, return_tensors="pt")
+                # ubacimo input u model i pretvaramo ga u output embedding koji normaliziramo
                 with torch.no_grad():
                     outputs = model.get_image_features(**inputs)
                 face_embedding = outputs.cpu().numpy().flatten()
                 face_embedding /= np.linalg.norm(face_embedding)  # Normalize embedding
 
-                # Use Faiss for efficient face search
+                # Use Faiss for efficient face search => ako imamo neke encodinge spremljene, onda searchamo tako da pogledamo faiss indeks s poznatima embeddingima i vratimo najprobable
                 if len(known_face_encodings) > 0:
                     name = search_face(face_embedding, faiss_index, known_face_names)
                     if name != "Unknown":
-                        frame = log_attendance(name, frame)  # Log attendance if face is recognized
+                        # ako smo ga uspjeli klasificirat, pozivamo log attendance
+                        frame = log_attendance(name, frame) 
                 else:
+                    
                     name = "Unknown"
 
                 # Draw rectangle and label on the frame
@@ -646,9 +733,10 @@ def generate_frames():
         else:
             cv2.putText(frame, "Liveness Failed: No Movement Detected", (50, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
-        old_gray = gray.copy()  # Update old frame for the next iteration
+        old_gray = gray.copy()  # mijenjamo frameove (iteriranje)
 
-        # Encode frame to JPEG format for streaming
+        # Pretvorimo video frame u jpg => jpg će pole postat tensor, to će poć u model itd.
+        # svaki frame postaje jpg i svaki frame se gleda zasebno  => yield omogući da ne moramo čekat da bude gotovo snimanje, nego da se more svaki frame slat zasebno (zato i vidimo live feed :)
         ret, buffer = cv2.imencode('.jpg', frame)
         frame = buffer.tobytes()
         yield (b'--frame\r\n'
@@ -657,41 +745,45 @@ def generate_frames():
     cap.release()
 
 
+# na ruti za video feed se poziva generate frames funkcija
 @app.route('/video_feed')
 def video_feed():
-    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame') # http live streaming di je svaki frame zasebni response
 
 
 
 
 
-
+# / ruta. Početna stranica
 @app.route('/')
 def index():
+    # dohvatimo api ključ iz env
     api_key = os.getenv('WEATHER_API_KEY')
     location = "Pula"  # Ili nešto drugo
+    # pozivamo funkciju za get_weather_forecast
     weather_condition = get_weather_forecast(api_key, location)
     
-    # Logika za vremensku prognozu
+    # Logika za vremensku prognozu => ako dohvaćena prognoza sadrži neki bad keyword, predictamo da će bit loše u suprotnemu, će bit ok
     if predict_absence_due_to_weather(weather_condition):
         message = "Bad weather predicted, late entries due to traffic problems are possible."
     else:
         message = "No significant weather issues expected. Students should come on time."
     
-    # Provjera je li korisnik već vidio popup
+    # Provjera je li korisnik već vidio popup => kad se prvi prvi prvi put ulogiramo, dobit ćemo popup o privacy-ju
     if 'seen_privacy_policy' not in session:
         show_popup = True
-        session['seen_privacy_policy'] = False  # Postavljanje sesije kako bi pop-up bio prikazan samo jednom
+        session['seen_privacy_policy'] = False  # Po defaulutu je false, ako ga nismo vidili (logično :D)
     else:
         show_popup = False
     
     return render_template('index.html', weather_condition=weather_condition, message=message, show_popup=show_popup)
 
 
+# GET ruta za dohvat zapisa o prisutnosti
 @app.route('/attendance', methods=['GET'])
 @login_required
 def attendance():
-    # Get filter parameters from the query string
+    # Lovimo filter parametre iz request argumenta => ako ga nema u request argumentu, onda je taj parametar prazan
     name_filter = request.args.get('name')
     subject_filter = request.args.get('subject')
     date_filter = request.args.get('date')
@@ -700,13 +792,14 @@ def attendance():
     year_filter = request.args.get('year')
     late_filter = request.args.get('late')
 
+    # connectamo se na bazu i upalimo kursor
     conn = sqlite3.connect('attendance.db')
     c = conn.cursor()
 
-    # Build the SQL query dynamically based on the provided filters
+    # Dynamic build of query
     query = "SELECT rowid, subject, name, date, time, late FROM attendance WHERE 1=1"
     params = []
-
+    # ako smo dali određeni argument, onda appendamo taj argument u tekst querija i u parametre
     if name_filter:
         query += " AND name = ?"
         params.append(name_filter)
@@ -738,10 +831,11 @@ def attendance():
     query += " ORDER BY date, time"
     c.execute(query, params)
     
+    # dohvatimo sve rezultate koji odgovaraju filteru
     records = c.fetchall()
     conn.close()
 
-    # Group records by date and subject
+    # Group records by date and subject  => dictionary za recordse po datumu. Svaki datum ima predmete za keyeve a values si svi studenti koji su bili tamo
     grouped_records = {}
     for rowid, subject, name, date, time, late in records:
         if date not in grouped_records:
@@ -753,16 +847,17 @@ def attendance():
     return render_template('attendance.html', grouped_records=grouped_records)
 
 
-
+# preuzimanje podataka
 @app.route('/download')
 def download_attendance():
+    # spajamo se na bazu i dohvaćamo sve attendance podatke
     conn = sqlite3.connect('attendance.db')
     c = conn.cursor()
     c.execute("SELECT subject, name, date, time FROM attendance ORDER BY subject, date, time")
     records = c.fetchall()
     conn.close()
 
-    # Create a string buffer to write CSV data
+    # Create string buffer za pisat u csv
     output = io.StringIO()
     writer = csv.writer(output)
     
@@ -770,7 +865,7 @@ def download_attendance():
     previous_subject = None
     student_count = 0
 
-    # Headers
+    # Headeri csv-a
     writer.writerow(['Subject', 'Name', 'Date', 'Time', 'Number of students'])
 
     # Grouped CSV data by subject
@@ -800,7 +895,7 @@ def download_attendance():
     
     return Response(output, mimetype="text/csv", headers={"Content-Disposition": "attachment;filename=attendance.csv"})
 
-# Isti vrag ko ovo gore, samo se još pošalje na mail
+# Ista stvar ko ovo gore, samo se još pošalje na mail
 
 @app.route('/download_and_email')
 def download_and_email_attendance():
@@ -822,19 +917,16 @@ def download_and_email_attendance():
         subject, name, date, time = record
 
         if subject != previous_subject:
-            # Write the student count for the previous subject, if exists
             if previous_subject is not None:
-                writer.writerow(['', '', '', '', student_count])  # student count row
-                writer.writerow([])  # empty row between each subject
-            # Write the new subject name and reset student count
-            writer.writerow([subject])  # subject header
+                writer.writerow(['', '', '', '', student_count])  
+                writer.writerow([])  
+            writer.writerow([subject]) 
             previous_subject = subject
             student_count = 0
 
         writer.writerow(['', name, date, time])
-        student_count += 1  # Increment student count for this subject
+        student_count += 1 
 
-    # Write student count for the last subject
     if previous_subject is not None:
         writer.writerow(['', '', '', '', student_count])
 
@@ -842,12 +934,12 @@ def download_and_email_attendance():
 
     csv_data = output.getvalue()
 
-    # Assuming you have the user's email from the session or request
-    user_email = request.args.get('email')  # Or get it from session
+    # dohvatimo request argumente
+    user_email = request.args.get('email') 
 
     return render_template('download.html', csv_data=csv_data, user_email=user_email)
-
-# brisanje po id-ju
+ 
+# brisanje po id-ju => spojimo se na bazu, pošaljemo query 
 @app.route('/delete_attendance/<int:id>', methods=['POST'])
 def delete_attendance(id):
     conn = sqlite3.connect('attendance.db')
@@ -857,7 +949,7 @@ def delete_attendance(id):
     conn.close()
     return redirect(url_for('attendance'))
 
-# dohvat statistike...forši smislit još koju
+# dohvat statistike=> obični sql upiti
 @app.route('/statistics')
 @login_required
 def statistics():
@@ -873,7 +965,7 @@ def statistics():
     conn.close()
     return render_template('statistics.html', student_attendance=student_attendance, subject_attendance=subject_attendance)
 
-# initially debug ruta, ali san je pustija
+# initially debug ruta, ali san je pustija => dohvat svih distinct studenata koji postoje
 @app.route('/students')
 @login_required
 def students():
@@ -885,7 +977,7 @@ def students():
 
     return render_template('students.html', students=students)
 
-
+# Ove rute su sve za grafikone => fetchaš podatke iz baze, malo ih obradiš i plotaš s matplotlibon
 # BITNO!!! NE NANKA POKUŠAVAT OPIRAT PLOTOVE AKO JOŠ NEMA ZABILJEŽENIH PRISUTNOSTI, JER ĆE SE ZBREJKAT
 @app.route('/plot/student_attendance')
 def plot_student_attendance():
@@ -968,12 +1060,11 @@ def plots():
     conn = sqlite3.connect('attendance.db')
     c = conn.cursor()
 
-    # Query to count the number of attendance records
     c.execute('SELECT COUNT(*) FROM attendance')
     attendance_count = c.fetchone()[0]  # Get the count from the result
     conn.close()
 
-    # Check if attendance_count is greater than 0
+    # Provjera dali ima podataka; ako nema, ne otvarat !!
     if attendance_count > 0:
         return render_template('plot_router.html')
     else:
@@ -987,12 +1078,14 @@ def plots():
 
 # API CALL...AKO POKAŽE ODREĐENO VRIME, DAMO ALERT DA BI MOGLI KASNIT
 
+# use api url, get response, turn response to json, return data
 def get_weather_forecast(api_key, location="your_city"):
     url = f"http://api.weatherapi.com/v1/forecast.json?key={api_key}&q={location}&days=1"
     response = requests.get(url)
     data = response.json()
     return data["forecast"]["forecastday"][0]["day"]["condition"]["text"]
 
+# provjera dali sadrži bad weather keywordse i vraćanje pripadne poruke
 def predict_absence_due_to_weather(weather_condition):
     bad_weather_keywords = ["rain", "storm", "snow", "fog", "hurricane"]
     for keyword in bad_weather_keywords:
@@ -1000,6 +1093,7 @@ def predict_absence_due_to_weather(weather_condition):
             return True
     return False
 
+# dohvatimo forecast, ubacimo forecast u analiziranje bad weathera i vratimo poruku (json)
 @app.route('/predict_absence', methods=['GET'])
 def predict_absence():
     api_key = "fe2e5f9339b2434db60124446241408"
@@ -1016,9 +1110,10 @@ def predict_absence():
         "message": message
     })
 
-
+# učitavanje NLP modela za filtriranje neprimjerenih riječi
 tokenizer, model2 = load_model_and_tokenizer()
-
+# prima message, rastavlja je na tokene i pretvori u tensor (threshold označava koliko je osjetljiv)
+# vraća koji je probbability da je poruka offensive. Ako je offensiveness veći od 30%, flag-a poruku i ne prikaže je
 def is_inappropriate_content(message, threshold=0.30):
     inputs = tokenizer(message, return_tensors="pt")
     outputs = model2(**inputs)
@@ -1028,6 +1123,7 @@ def is_inappropriate_content(message, threshold=0.30):
 
 
 # OVO JE KAO NEKI PROFESORSKI FORUM/CHAT ILI ČA JA ZNAN KAKO BI SE TO ZVALO
+# Niš pametno; običan sql upit
 @app.route('/announcements', methods=['GET'])
 @login_required
 def announcements():
@@ -1039,19 +1135,17 @@ def announcements():
     return render_template('announcements.html', announcements=announcements)
 
 @app.route('/post_announcement', methods=['POST'])
+# samo šaljemo post s tekstom poruke, ubacimo ga u model i vidimo dali se more objavit. Ako da, sprema se u bazu i prikaže. Autor je trenutno ulogirani korisnik
 @login_required
 def post_announcement():
     message = request.form['message']
-    
-    # Check if message is appropriate
+
     if is_inappropriate_content(message):
-        # Redirect with a warning if content is inappropriate
         return redirect(url_for('announcements', warning="Your announcement contains inappropriate language and was not posted."))
     
     date_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     teacher_name = current_user.username
 
-    # Insert the announcement into the database
     conn = sqlite3.connect('attendance.db')
     c = conn.cursor()
     c.execute("INSERT INTO announcements (date_time, teacher_name, message) VALUES (?, ?, ?)",
@@ -1060,6 +1154,7 @@ def post_announcement():
     conn.close()
     return redirect(url_for('announcements'))
 
+# šaljemo post request s delete upiton po id-ju
 @app.route('/delete_announcement/<int:id>', methods=['POST'])
 @login_required
 def delete_announcement(id):
@@ -1070,8 +1165,8 @@ def delete_announcement(id):
     conn.close()
     return redirect(url_for('announcements'))
 
-from flask import flash  # Import flash for showing messages
 
+# Pošaljemo get, dohvatimo poruku po id-ju. Uredimo je, pasa kroz model da vidimo dali je neprimjerena i editiramo
 @app.route('/edit_announcement/<int:id>', methods=['GET', 'POST'])
 @login_required
 def edit_announcement(id):
@@ -1084,9 +1179,9 @@ def edit_announcement(id):
         teacher_name = current_user.username
 
         # Check for inappropriate content
-        if is_inappropriate_content(message, threshold=0.5):  # Adjust threshold as needed
+        if is_inappropriate_content(message, threshold=0.5):  
             flash('Your announcement contains inappropriate content and cannot be saved.', 'error')
-            return redirect(url_for('edit_announcement', id=id))  # Redirect back to edit page
+            return redirect(url_for('edit_announcement', id=id))  
 
         c.execute("UPDATE announcements SET date_time = ?, message = ? WHERE id = ? AND teacher_name = ?",
                   (date_time, message, id, teacher_name))
@@ -1099,15 +1194,15 @@ def edit_announcement(id):
     conn.close()
 
     if announcement is None or announcement[2] != current_user.username:
-        return redirect(url_for('announcements'))  # Redirect if announcement not found or not owned by user
+        return redirect(url_for('announcements'))  
 
     return render_template('edit_announcement.html', announcement=announcement)
 
 
-# Ruta koja će najprije provjerit koliko predaanja je održano iz pojedinega predmeta
-# Onda će provjerit za svakega studenta na koliko predavanja je bija
-# To prikazat na način => veliki header=> naziv predmeta i ukupan broj predavanja, i ispod se izlistaju svi studenti koji su ikad bili na predmetu s brojen koliko puta su bili
-
+#generira izvještaj o prisutnosti studenata za svaki predmet. 
+# Iz baze podataka izračunava ukupan broj održanih predavanja, postotak prisutnosti svakog studenta, te prosječnu prisutnost za predmet.
+#  Studenti se također označavaju kao oni koji ispunjavaju ili ne ispunjavaju prag od 50% prisutnosti.
+#  Generirani izvještaj prosljeđuje se predlošku attendance_report.html za prikaz.
 @app.route('/report')
 @login_required
 def report():
@@ -1165,8 +1260,8 @@ def report():
     return render_template('attendance_report.html', report=report)
 
 
-# Ruta koja će dohvatit sva kašnjenja, s predmetima i entry timeon
-
+# Ruta koja će dohvatit sva kašnjenja, i prikazat grafikon da se vidi kad najviše kasne
+# Koristimo collections/counter za brojanje najčešćih sati i dana kad ljudi kasne
 @app.route('/late_analysis', methods=["GET", "POST"])
 @login_required
 def late_entries():
@@ -1178,13 +1273,13 @@ def late_entries():
     late_entries = c.fetchall()
     conn.close()
 
-    # Initialize counters
+    # Init counters
     hour_counter = Counter()
     weekday_counter = Counter()
 
     for entry in late_entries:
-        time_in = entry[2]  # 'time' is the third column
-        date = entry[1]     # 'date' is the second column
+        time_in = entry[2]  
+        date = entry[1]     
 
         # Convert time and date 
         time_obj = datetime.strptime(time_in, "%H:%M:%S")
@@ -1231,29 +1326,30 @@ def late_entries():
 
 def scrape_github_profile(url):
     try:
-        # Send an HTTP request to the GitHub profile page
+        # http req na github profil (moj url)
         response = requests.get(url)
         response.raise_for_status()
 
-        # Parse the HTML content of the page
+        # parsiramo cijelu stranicu u html-u
         soup = BeautifulSoup(response.text, 'html.parser')
 
-        # Extract the name of the user
+        # tražimo dio s usernameon
         name = soup.find('span', class_='p-name').text.strip()
 
-        # Extract the bio (if available)
+        # tražimo dio s biography
         bio = soup.find('div', class_='p-note user-profile-bio mb-3 js-user-profile-bio f4').text.strip() if soup.find('div', class_='p-note user-profile-bio mb-3 js-user-profile-bio f4') else 'No bio available'
 
-        # Extract the profile picture URL
+        # tražimo profile picture
         profile_picture = soup.find('img', class_='avatar-user')['src'] if soup.find('img', class_='avatar-user') else None
 
-        # Extract number of followers
+        # tražimo broj dollowera
         followers = soup.find('span', class_='text-bold').text.strip()
 
-        # Extract number of repositories
+        # tražimo broj public repozitorija
         repositories_element = soup.find('span', class_='Counter')
-        repositories = repositories_element.text.strip() if repositories_element else '0'  # Safely handle missing repositories
+        repositories = repositories_element.text.strip() if repositories_element else '0'  # => hendlanje slučaja ako ih ima 0
 
+        # vraćanje scrapeanih podataka
         return {
             'name': name,
             'bio': bio,
@@ -1266,19 +1362,19 @@ def scrape_github_profile(url):
         return None
 
 
+# ruta za scraping koja koristi gornju funkciju
 @app.route('/scrape_github', methods=['GET'])
 def github_profile():
-    # GitHub profile URL to scrape
+    # koji url?
     url = 'https://github.com/AntonioLabinjan'
     
     if not url:
         return jsonify({"error": "Please provide a GitHub profile URL"}), 400
     
-    # Scrape the profile
     profile_info = scrape_github_profile(url)
     
     if profile_info:
-        # Render profile info using an HTML template
+        # ako smo nešto našli, izrenderirat ćemo stranicu s ovim contentom
         html_content = f"""
         <!DOCTYPE html>
         <html lang="en">
@@ -1289,8 +1385,8 @@ def github_profile():
             <style>
                 body {{
                     font-family: Arial, sans-serif;
-                    background-color: #111; /* Dark background */
-                    color: #f9f9f9; /* Light text color */
+                    background-color: #111; 
+                    color: #f9f9f9;
                     margin: 0;
                     padding: 0;
                 }}
@@ -1298,13 +1394,13 @@ def github_profile():
                     max-width: 800px;
                     margin: 50px auto;
                     padding: 20px;
-                    background-color: #222; /* Slightly lighter background for the container */
+                    background-color: #222; 
                     border-radius: 8px;
                     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
                     text-align: center;
                 }}
                 h1 {{
-                    color: #ff6600; /* Orange color */
+                    color: #ff6600; 
                 }}
                 p {{
                     font-size: 18px;
@@ -1312,7 +1408,7 @@ def github_profile():
                 }}
                 .followers, .repositories {{
                     font-weight: bold;
-                    color: #ff6600; /* Orange color for followers and repositories text */
+                    color: #ff6600; 
                     font-size: 20px;
                 }}
                 .profile-picture {{
@@ -1356,14 +1452,16 @@ def github_profile():
 
 
 
-# Route to display the GitHub profile data in HTML template
+# scraping za pdf-ove
 def extract_pdf_text(pdf_url):
+    # dajemo request za dohvat pdf-a , ugasimo ssl
     response = requests.get(pdf_url, verify=False)
+    # ako je response ok, skinemo fajl
     if response.status_code == 200:
         with open("calendar.pdf", "wb") as f:
             f.write(response.content)
         
-        # Extract text from the PDF using pdfplumber
+        # Extract texta iz fajla
         text_content = ""
         with pdfplumber.open("calendar.pdf") as pdf:
             for page in pdf.pages:
@@ -1372,7 +1470,7 @@ def extract_pdf_text(pdf_url):
     else:
         return "Failed to retrieve PDF."
 
-# filter only non-working days
+# filter za praznike
 def get_non_working_days(text):
     # Define keywords
     keywords = [
@@ -1381,12 +1479,13 @@ def get_non_working_days(text):
         "Dan državnosti", "Velike Gospe", "Dan domovinske zahvalnosti"
     ]
     
-    # Search for dates with given keywords
+    # tražimo datume s tima keywordsima
     non_working_days = []
+    # dohvatimo sve dane koji sadrže neki keyword, splitamo svaki sa /n
     for line in text.split("\n"):
         if any(keyword in line for keyword in keywords):
             non_working_days.append(line.strip())
-    
+    # onda ih izjoinamo
     return "\n".join(non_working_days)
 
 # Flask route to display the filtered non-working days
@@ -1396,10 +1495,10 @@ def show_calendar():
     calendar_text = extract_pdf_text(pdf_url)
     non_working_days = get_non_working_days(calendar_text)
     
-    # Split the non-working days into a list for the HTML unordered list
+    # Splitamo extractane dane
     non_working_days_list = non_working_days.split("\n")
 
-    # Render the filtered non-working days as a list with bullet points
+    # izrenderiramo ih s bullet pointsima
     html_content = f"""
     <html>
         <head>
