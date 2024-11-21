@@ -1,3 +1,4 @@
+# UMRA SAN DOK SAN NAPISA SVE KOMENTARE 
 # iz fajla imports importamo sve (to san napravija da niman 50 linija importova na vr)
 from imports import *
 
