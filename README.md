@@ -1,4 +1,5 @@
 UPDATE: najbolje dela ako su klase dobro izbalansirane (a.k.a ako svaka osoba ima isto (ili bar slično) slika)
+=> ali ne smi bit previše instanci po klasi jer se onda počinju overlapat
 FORŠI ĆE TREBAT MALO POŠTIMAT KAKO SE APP VRTI (PORT I TO..za hostat)
 
 Provat spremit known encoding tensore u neki csv ili neki klinac
