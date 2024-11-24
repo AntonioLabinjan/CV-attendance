@@ -1,5 +1,6 @@
 Distance < 2 više ni dovoljno dobar, triba ga smanjit jer su tensori sad bliže
-
+Više nećemo gledat distance, nego ćemo implementirat majority voting => vratimo top k matches, i klasificiramo kao majority
+# zanimljivost => ako koristimo live detekciju i dalje nas prepoznaje
 
 UPDATE: najbolje dela ako su klase dobro izbalansirane (a.k.a ako svaka osoba ima isto (ili bar slično) slika)
 => ali ne smi bit previše instanci po klasi jer se onda počinju overlapat
