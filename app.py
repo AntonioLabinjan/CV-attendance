@@ -671,79 +671,108 @@ def perform_liveness_check(frame):
     # daje true/false i o temu ovisi dal ćemo ga spremit ili ne
     return live_face_detected
 
-# COMPUTER VISION MAGIJA
-def generate_frames():
-    # otvara kameru
-    cap = cv2.VideoCapture(0)
-    # ovo je za početak none, jer nema još nikakovih frameova
-    old_gray = None
 
-    # ako kamera ne dela
+
+def classify_face(face_embedding, faiss_index, known_face_names, k1=3, k2=5, threshold=0.6):
+    """
+    Classifies a face embedding using majority voting logic.
+    Args:
+        face_embedding: The embedding of the face to classify.
+        faiss_index: FAISS index for known faces.
+        known_face_names: List of known face names corresponding to FAISS index.
+        k1: Number of nearest neighbors for majority voting.
+        k2: Number of fallback neighbors.
+        threshold: Similarity threshold for classification.
+    Returns:
+        majority_class: Predicted class label.
+        class_counts: Vote counts for each class.
+    """
+    D, I = faiss_index.search(face_embedding[np.newaxis, :], max(k1, k2))
+    votes = {}
+
+    for idx, dist in zip(I[0], D[0]):
+        if idx == -1 or dist > threshold:
+            continue
+        label = known_face_names[idx]
+        votes[label] = votes.get(label, 0) + 1
+
+    if votes:
+        majority_class = max(votes, key=votes.get)
+    else:
+        majority_class = "Unknown"
+
+    return majority_class, votes
+
+
+# COMPUTER VISION MAGIJA
+def generate_frames(k1=20, k2=5, threshold=0.7):
+    # Open the camera
+    cap = cv2.VideoCapture(0)
     if not cap.isOpened():
         print("Error: Camera could not be opened.")
         return
 
-    # sve dok kamera dela, lovi frameove
+    old_gray = None  # Initialize for liveness detection
+
     while True:
         ret, frame = cap.read()
         if not ret:
             print("Warning: Couldn't grab frame. Retrying...")
             continue
-        # pretvori ih u odgovarajući format
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        faces = detect_face(frame)  
 
-        # za početak u old_gray spremimo kopiju prvega i onda iterativno spremamo najzadnji
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        faces = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml').detectMultiScale(gray, 1.1, 4)
+
         if old_gray is None:
             old_gray = gray.copy()
 
-        # samo print korisniku da mora pomicat glavu
+        # Display liveness instructions
         cv2.putText(frame, "Move your head around", (50, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
 
-        # ako liveness potvrda pasa ok
-        if check_liveness_over_time(frame, faces, old_gray, gray):  
+        if check_liveness_over_time(frame, faces, old_gray, gray):
             cv2.putText(frame, "Liveness Confirmed", (50, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-            # Procesiramo sva lica ulovljena na capture-u (dela i za više lica istovremeno, ali najbolje je kad je 1 po 1)
-            # extractamo frameove s licima preko koordinata
+
             for (x, y, w, h) in faces:
                 face_image = frame[y:y+h, x:x+w]
-                
-                # Convertamo image u RGB i extractamo embedding
-                face_image_rgb = cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB)
-                # pretvaramo u tensor
-                inputs = processor(images=face_image_rgb, return_tensors="pt")
-                # ubacimo input u model i pretvaramo ga u output embedding koji normaliziramo
+                face_rgb = cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB)
+                inputs = processor(images=face_rgb, return_tensors="pt")
+
                 with torch.no_grad():
                     outputs = model.get_image_features(**inputs)
                 face_embedding = outputs.cpu().numpy().flatten()
                 face_embedding /= np.linalg.norm(face_embedding)  # Normalize embedding
 
-                # Use Faiss for efficient face search => ako imamo neke encodinge spremljene, onda searchamo tako da pogledamo faiss indeks s poznatima embeddingima i vratimo najprobable
                 if len(known_face_encodings) > 0:
-                    name = search_face(face_embedding, faiss_index, known_face_names)
-                    if name != "Unknown":
-                        # ako smo ga uspjeli klasificirat, pozivamo log attendance
-                        frame = log_attendance(name, frame) 
+                    # Perform majority vote classification
+                    majority_class, class_counts = classify_face(
+                        face_embedding, faiss_index, known_face_names, k1, k2, threshold
+                    )
+
+                    # Format vote results for display
+                    match_text = f"{majority_class} ({class_counts[majority_class]} votes)"
+                    if majority_class != "Unknown":
+                        frame = log_attendance(majority_class, frame)
                 else:
-                    
-                    name = "Unknown"
+                    majority_class = "Unknown"
+                    match_text = "Unknown (0 votes)"
 
                 # Draw rectangle and label on the frame
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
-                cv2.putText(frame, name, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
+                cv2.putText(frame, match_text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
         else:
             cv2.putText(frame, "Liveness Failed: No Movement Detected", (50, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
-        old_gray = gray.copy()  # mijenjamo frameove (iteriranje)
+        old_gray = gray.copy()
 
-        # Pretvorimo video frame u jpg => jpg će pole postat tensor, to će poć u model itd.
-        # svaki frame postaje jpg i svaki frame se gleda zasebno  => yield omogući da ne moramo čekat da bude gotovo snimanje, nego da se more svaki frame slat zasebno (zato i vidimo live feed :)
+        # Encode and yield the frame
         ret, buffer = cv2.imencode('.jpg', frame)
         frame = buffer.tobytes()
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
     cap.release()
+
+
 
 
 # na ruti za video feed se poziva generate frames funkcija
