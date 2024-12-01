@@ -1,5 +1,5 @@
 Distance < 2 više ni dovoljno dobar, triba ga smanjit jer su tensori sad bliže
-Više nećemo gledat distance, nego ćemo implementirat majority voting => vratimo top k matches, i klasificiramo kao majority
+Više nećemo gledat distance, nego ćemo implementirat majority voting => vratimo top k matches, i klasificiramo kao majority (SAN)
 # zanimljivost => ako koristimo live detekciju i dalje nas prepoznaje
 
 UPDATE: najbolje dela ako su klase dobro izbalansirane (a.k.a ako svaka osoba ima isto (ili bar slično) slika)
@@ -8,7 +8,10 @@ FORŠI ĆE TREBAT MALO POŠTIMAT KAKO SE APP VRTI (PORT I TO..za hostat)
 
 Provat spremit known encoding tensore u neki csv ili neki klinac
 U live add dodat upute ča student mora delat da budu slične slike (miči glavu na određeni način i sl.)
-Treba napravit mali overkill i za svaku klasu ubacit bar 30-40 slika. Bit će naporno, ali efikasno
+Treba napravit mali overkill i za svaku klasu ubacit bar 30-40 slika. Bit će naporno, ali efikasno => TO NE BI BIJA OVERKILL NEGO DOSLOVNI KILL I MENE I PROGRAMA HEHE
+
+https://drive.google.com/drive/u/2/folders/1A4OaZsdmRrFKBuv-KGyu9Pdko9iPuTw5
+
 
 
 CURRENT PROBLEM: 
