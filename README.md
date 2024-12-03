@@ -1,5 +1,5 @@
 ouKDp8WVSAT8XOG0  => MONGO PASS
-
+mongodb+srv://alabinjan:<db_password>@wacluster.zuyky.mongodb.net/?retryWrites=true&w=majority&appName=WACluster => CONNECTION STRING
 
 
 Distance < 2 više ni dovoljno dobar, triba ga smanjit jer su tensori sad bliže
