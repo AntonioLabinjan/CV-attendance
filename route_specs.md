@@ -1,3 +1,5 @@
+I will probbably kill 50+ % of these routes, but they're currently still in the app
+
 ### Specification for `/set_subject` Route
 
 - **Supported Methods**: `GET`, `POST`
@@ -371,7 +373,7 @@
 **Route Usage:**
 - This route allows users to download attendance data in CSV format and provides an option to open Gmail in a new tab with the user's email pre-filled. The attendance data is grouped by subject and ordered by date and time. The user's email is passed through the query parameters or session, and the generated CSV data is embedded in the HTML template for download.
 
-**Functions Used (continued):**
+**Functions Used:**
 - **`request.args.get('email')`**: Retrieves the email address passed as a query parameter in the GET request.
 - **`EmailMessage()`**: Creates a new email message object.
 - **`msg.set_content()`**: Sets the plain text content of the email.
@@ -469,8 +471,6 @@
    - Response HTTP status code: `500`.
   
 
-Here's a detailed route specification based on the `show_calendar` route that filters and displays non-working days from a PDF in a rendered HTML template:
-
 ---
 
 ### Route: `/calendar`
@@ -543,4 +543,3 @@ A webpage with a header "Non-Working Days 2024/2025" and a list like:
 
 ---
 
-This route provides a functional way to convert PDF-based calendar information into a clean, readable web format for users to easily access.
