@@ -1,4 +1,4 @@
-
+CHECKPOINT.ipynb is important
 
 Distance < 2 više ni dovoljno dobar, triba ga smanjit jer su tensori sad bliže
 Više nećemo gledat distance, nego ćemo implementirat majority voting => vratimo top k matches, i klasificiramo kao majority (SAN)
