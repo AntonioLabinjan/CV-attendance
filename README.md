@@ -1,3 +1,5 @@
+OVAJ README JE TEŠKO PLOSKANJE. TO SVE TRIBA OBRISAT I NAPISAT NANOVO
+
 CHECKPOINT.ipynb is important
 
 Distance < 2 više ni dovoljno dobar, triba ga smanjit jer su tensori sad bliže
