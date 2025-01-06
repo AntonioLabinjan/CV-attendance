@@ -116,5 +116,4 @@ The database will be automatically created on the first run. Ensure attendance.d
 Place student images in the known_faces directory, organized by student folders.
 
 
-Video demo: 
-https://youtu.be/bh1wrMPy-d0
+Video demo: https://youtu.be/hQDcAjGRHMQ => OFFICIAL VIDEO ZA PROJEKT
