@@ -1,5 +1,3 @@
-I will probbably kill 50+ % of these routes, but they're currently still in the app
-
 ### Specification for `/set_subject` Route
 
 - **Supported Methods**: `GET`, `POST`
