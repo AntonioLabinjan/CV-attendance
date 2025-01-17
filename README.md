@@ -1,3 +1,5 @@
+Komanda za runnat ovega Boga na Dockeru: docker run -p 5145:5145 --name majkabojza my-attendance-app
+
 MORAN NAPRAVIT DOCKER IMAGE S APLIKACIJON I ONDA HOSTAT DOCKER IMAGE NA RENDER....KREPAT ĆU...ZGORIT ĆU....AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA (šalin se. OK san :) )
 
 
