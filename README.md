@@ -1,66 +1,13 @@
-Komanda za runnat ovega Boga na Dockeru: docker run -p 5145:5145 --name majkabojza my-attendance-app
-
-MORAN NAPRAVIT DOCKER IMAGE S APLIKACIJON I ONDA HOSTAT DOCKER IMAGE NA RENDER....KREPAT ĆU...ZGORIT ĆU....AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA (šalin se. OK san :) )
-
-
-OVAJ README JE TEŠKO PLOSKANJE. TO SVE TRIBA OBRISAT I NAPISAT NANOVO
-
+Docker run command: docker run -p 5145:5145 --name majkabojza my-attendance-app
 CHECKPOINT.ipynb is important
-
-Distance < 2 više ni dovoljno dobar, triba ga smanjit jer su tensori sad bliže
-Više nećemo gledat distance, nego ćemo implementirat majority voting => vratimo top k matches, i klasificiramo kao majority (SAN)
-# zanimljivost => ako koristimo live detekciju i dalje nas prepoznaje
-
-UPDATE: najbolje dela ako su klase dobro izbalansirane (a.k.a ako svaka osoba ima isto (ili bar slično) slika)
-=> ali ne smi bit previše instanci po klasi jer se onda počinju overlapat
-FORŠI ĆE TREBAT MALO POŠTIMAT KAKO SE APP VRTI (PORT I TO..za hostat)
-
-Provat spremit known encoding tensore u neki csv ili neki klinac
-U live add dodat upute ča student mora delat da budu slične slike (miči glavu na određeni način i sl.)
-Treba napravit mali overkill i za svaku klasu ubacit bar 30-40 slika. Bit će naporno, ali efikasno => TO NE BI BIJA OVERKILL NEGO DOSLOVNI KILL I MENE I PROGRAMA HEHE
-
-https://drive.google.com/drive/u/2/folders/1A4OaZsdmRrFKBuv-KGyu9Pdko9iPuTw5
-
-
-
-CURRENT PROBLEM: 
-Trenutno ni problema, faiss funkcionira za face recognition.
-Živo me zanima dali će delat i sutra, ili će magično krepat priko noći :)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-OVO JE Jako BITNO: https://colab.research.google.com/drive/1ZKVMC7qs3HBf3a2hHpYBdOiWyWDQUK8O#scrollTo=_O9W2yRrTOXn
-
-
-
-
-
+important colab stuff: https://colab.research.google.com/drive/1nrCUORercQ2naDgDDbWI6EDxUA9TBVRa?authuser=2#scrollTo=u-VfIT50OcYj
+important colab stuff: https://drive.google.com/drive/u/2/folders/1A4OaZsdmRrFKBuv-KGyu9Pdko9iPuTw5
+important colab stuff: https://colab.research.google.com/drive/1ZKVMC7qs3HBf3a2hHpYBdOiWyWDQUK8O#scrollTo=_O9W2yRrTOXn
 #### Čudan pokušaj tuninga clip-a: https://colab.research.google.com/drive/19LnwteQm3fQDx77hlOybQwT5xq5t6Yk1?usp=sharing#scrollTo=CmTFz3RObaWr
-#### Ovaj readme je kaotičan, to ću ben uljepšat kad bude tribalo
-#### + dokumentacija
-#### + nekako složit neki stil. NE ZNAN TO NAPRAVIT KAKO TRIBA...morat ću iskopirat neki bootstrap
-
-### napravit UML dijagrame (class)
 ### NAPOMENA: lokalni folder di sve ovo delan se zove WORKING_CV_ATTENDANCE (da ne zabin hehe)
 # Face Recognition Attendance System
 
-## Napravit 2 nova gmail accounta; 1 za sendera, 1 za recievera; da ne koristin svoje privatne mailove za ovo
-
-# recovery code: XYWZZG4535Y3ELMJJL6TRRVM
+# sendgrid recovery code: XYWZZG4535Y3ELMJJL6TRRVM
 Test credentials:
 Email: alabinjan6@gmail.com
 Username: Antonio
