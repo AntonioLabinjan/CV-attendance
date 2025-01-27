@@ -25,9 +25,6 @@ A simple and effective Face Recognition Attendance System using CLIP model for f
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
-- [Folder Structure](#folder-structure)
-- [Troubleshooting](#troubleshooting)
-- [License](#license)
 
 ## Project Overview
 
@@ -67,6 +64,9 @@ The database will be automatically created on the first run. Ensure attendance.d
 
 6. **Prepare known faces**
 Place student images in the known_faces directory, organized by student folders.
+
+7. **Run app**
+Run app locally our using docker: docker run -p 5145:5145 --name ljama my-attendance-app
 
 
 Video demo: https://youtu.be/hQDcAjGRHMQ => OFFICIAL VIDEO ZA PROJEKT
