@@ -1,8 +1,9 @@
 Docker run command: docker run -p 5145:5145 --name majkabojza my-attendance-app
 CHECKPOINT.ipynb is important
-important colab stuff: https://colab.research.google.com/drive/1nrCUORercQ2naDgDDbWI6EDxUA9TBVRa?authuser=2#scrollTo=u-VfIT50OcYj
-important colab stuff: https://drive.google.com/drive/u/2/folders/1A4OaZsdmRrFKBuv-KGyu9Pdko9iPuTw5
-important colab stuff: https://colab.research.google.com/drive/1ZKVMC7qs3HBf3a2hHpYBdOiWyWDQUK8O#scrollTo=_O9W2yRrTOXn
+# important colab stuff: 
+- https://colab.research.google.com/drive/1nrCUORercQ2naDgDDbWI6EDxUA9TBVRa?authuser=2#scrollTo=u-VfIT50OcYj
+- https://drive.google.com/drive/u/2/folders/1A4OaZsdmRrFKBuv-KGyu9Pdko9iPuTw5
+- https://colab.research.google.com/drive/1ZKVMC7qs3HBf3a2hHpYBdOiWyWDQUK8O#scrollTo=_O9W2yRrTOXn
 #### Čudan pokušaj tuninga clip-a: https://colab.research.google.com/drive/19LnwteQm3fQDx77hlOybQwT5xq5t6Yk1?usp=sharing#scrollTo=CmTFz3RObaWr
 ### NAPOMENA: lokalni folder di sve ovo delan se zove WORKING_CV_ATTENDANCE (da ne zabin hehe)
 # Face Recognition Attendance System
