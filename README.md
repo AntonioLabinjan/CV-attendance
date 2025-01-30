@@ -1,4 +1,6 @@
-Okej: sad smo riješili da moremo lovit frameove iz frontenda i to šeko dela priko dockera. Sad samo triba nekako napravit da aplikacija i dalje dela kao prije
+Okej: sad smo riješili da moremo lovit frameove iz frontenda i to šeko dela priko dockera. Sad samo triba nekako napravit da aplikacija i dalje dela kao prije => ovo ča ulovimo iz frontenda prosljedit na backend na isto misto di se prije prosljeđivalo one frameove ča smo dobili s cv2 cap
+
+Ova ideja od doli je bila dobra...jedino ča smo vjerojatno stvarno sjebali 15-20% ruta
 
 
 Kamera na dockeru nas zafrkava; ideja => omogućit frontend capture i vidit dali to more delat na dockeru (u trenutku dok ovo pišen dela se probni docker build). I onda triba lipo hitit da se taj capture šalje na backend i vjerojatno sjebat  15-20% rutah koje iman, ali nema veze...baren je zabavno...a zašto ja sad ne spin? To nanka Bog ne zna...srića da ni predavanji danas.....praktikum.....praktikum....praktikum.......aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
