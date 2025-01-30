@@ -1,3 +1,5 @@
+Kamera na dockeru nas zafrkava; ideja => omogućit frontend capture i vidit dali to more delat na dockeru (u trenutku dok ovo pišen dela se probni docker build). I onda triba lipo hitit da se taj capture šalje na backend i vjerojatno sjebat  15-20% rutah koje iman, ali nema veze...baren je zabavno...a zašto ja sad ne spin? To nanka Bog ne zna...srića da ni predavanji danas.....praktikum.....praktikum....praktikum.......aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
 Docker run command: docker run -p 5145:5145 --name majkabojza my-attendance-app
 CHECKPOINT.ipynb is important
 # important colab stuff: 
