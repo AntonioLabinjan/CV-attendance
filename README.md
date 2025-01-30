@@ -1,3 +1,6 @@
+FORŠI; NE ZNAN: docker pull antoniolabinjan/my-attendance-app:latest
+
+
 Okej: sad smo riješili da moremo lovit frameove iz frontenda i to šeko dela priko dockera. Sad samo triba nekako napravit da aplikacija i dalje dela kao prije => ovo ča ulovimo iz frontenda prosljedit na backend na isto misto di se prije prosljeđivalo one frameove ča smo dobili s cv2 cap
 
 Ova ideja od doli je bila dobra...jedino ča smo vjerojatno stvarno sjebali 15-20% ruta
