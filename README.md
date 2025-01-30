@@ -11,14 +11,14 @@ Kratki opis:
 Aplikacija za prepoznavanje lica i bilježenje prisutnosti na nastavi (ili u drugim slučajevima) implementirana koristeći Flask, Clip i Faiss. 
 
 Funkcionalnosti:
-Student:
-Za korištenje ove grupe funkcionalnosti nije potrebna autentifikacija
+- Student:
+- Za korištenje ove grupe funkcionalnosti nije potrebna autentifikacija
 
   1) Spremanje face_embeddinga putem live_feeda
   2) Spremanje face_embeddinga putem uploadanja lokalnih slika
   3) Prijava prisutnosti pomoću face scanninga
 
-Profesor(admin):
+- Profesor(admin):
   1) auth
   2) definiranje predmeta/kolegija sa nazivom i intervalom u kojem se može prijaviti prisutnost
   3) dodavanje studenata u sustav; svaki student imat će ime i slike prema kojima će ga model prepoznati
