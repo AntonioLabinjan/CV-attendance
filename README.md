@@ -37,8 +37,8 @@ Funkcionalnosti:
 
 Prijava:
 Preporuča se napraviti vlastiti account s vlastitim mailom, ali ukoliko vam se to ne da, možete koristiti moj:
-username: Antonio
-password: 4uGnsUh9!!!
-email: alabinjan6@gmail.com
+- username: Antonio
+- password: 4uGnsUh9!!!
+- email: alabinjan6@gmail.com
 
 YouTube: https://youtu.be/hQDcAjGRHMQ
