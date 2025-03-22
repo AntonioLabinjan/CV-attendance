@@ -1,44 +1,55 @@
-# COMPUTER VISION ATTENDANCE MODULE (name still not definitive)
+# COMPUTER VISION ATTENDANCE MODULE (name still not definitive)  
+Faculty of Informatics in Pula: [https://fipu.unipu.hr/](https://fipu.unipu.hr/)  
 
-Fakultet informatike u Puli:
-https://fipu.unipu.hr/
+**Author:** Antonio Labinjan  
+**Course:** Web Applications  
+**Mentor:** doc.dr.sc. Nikola Tanković  
 
-- Autor: Antonio Labinjan
-- Kolegij: Web-aplikacije
-- Mentor: doc.dr.sc. Nikola Tanković
+### **Brief Description:**  
+An application for face recognition and attendance tracking (or other use cases) implemented using Flask, CLIP, and FAISS.
 
-Kratki opis:
-Aplikacija za prepoznavanje lica i bilježenje prisutnosti na nastavi (ili u drugim slučajevima) implementirana koristeći Flask, Clip i Faiss. 
+---
 
-Funkcionalnosti:
-- Student:
-- Za korištenje ove grupe funkcionalnosti nije potrebna autentifikacija
+## **Features:**
 
-  1) Spremanje face_embeddinga putem live_feeda
-  2) Spremanje face_embeddinga putem uploadanja lokalnih slika
-  3) Prijava prisutnosti pomoću face scanninga
+### **Student:**
 
-- Profesor(admin):
-  1) auth
-  2) definiranje predmeta/kolegija sa nazivom i intervalom u kojem se može prijaviti prisutnost
-  3) dodavanje studenata u sustav; svaki student imat će ime i slike prema kojima će ga model prepoznati
-  4) primanje email notifikacije svaki put kad student uspješno prijavi prisutnost
-  5) pregled i filtriranje podataka o prisutnosti
-  6) preuzimanje izvještaja o prisutnosti u csv formatu
-  7) dijeljenje izvještaja mailom
-  8) brisanje prisutnosti
-  9) pregled statistike
-  10) pregled popisa svih studenata
-  11) pregled vizualizacije podataka kroz 3 (za sad) vrste grafikona
-  12) korištenje internog profesorskog announcement foruma (CRUD operacije nad obavijestima)
-  13) pregled postotka prisutnosti za pojedinog studenta na određenim predmetima
-  14) analiza kasnih dolazaka studenata
-  15) pregled official academic kalendara
+_No authentication is required to use these features._
 
-Prijava:
-Preporuča se napraviti vlastiti account s vlastitim mailom, ali ukoliko vam se to ne da, možete koristiti moj:
-- username: Antonio
-- password: 4uGnsUh9!!!
-- email: alabinjan6@gmail.com
+- Save face embeddings via live feed  
+- Save face embeddings by uploading local images  
+- Mark attendance using face scanning  
 
-YouTube: https://youtu.be/hQDcAjGRHMQ
+---
+
+### **Professor (Admin):**
+
+- **Authentication**  
+- Define courses with names and time intervals during which attendance can be marked  
+- Add students to the system—each student will have a name and images for model recognition  
+- Receive email notifications whenever a student successfully marks attendance  
+- View and filter attendance records  
+- Download attendance reports in CSV format  
+- Share attendance reports via email  
+- Delete attendance records  
+- View statistics  
+- View a list of all students  
+- Visualize data through three (for now) different types of charts  
+- Use an internal announcement forum for professors (CRUD operations on announcements)  
+- View the attendance percentage for individual students in specific courses  
+- Analyze student late arrivals  
+- Access the official academic calendar  
+
+---
+
+## **Login Information:**  
+It is recommended to create your own account with your email. However, if you prefer not to, you can use my credentials:
+
+- **Username:** Antonio  
+- **Password:** 4uGnsUh9!!!  
+- **Email:** alabinjan6@gmail.com  
+
+---
+
+### **Demo Video:**  
+Watch the demonstration on YouTube: [https://youtu.be/hQDcAjGRHMQ](https://youtu.be/hQDcAjGRHMQ)
