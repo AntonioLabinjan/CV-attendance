@@ -30,6 +30,64 @@ Evo nekoliko ključnih natuknica koje pokazuju zašto je *FaceMark* bolje od kla
 
 Ove prednosti jasno pokazuju da *FaceMark* nudi brže, sigurnije, učinkovitije i skalabilnije rješenje za praćenje prisutnosti u usporedbi s tradicionalnim metodama.
 
+
+
+UI/UX STUFF
+Intuitivno sučelje:
+
+Jednostavno i jasno korisničko sučelje omogućava lako korištenje čak i korisnicima bez tehničkog iskustva.
+
+Brza navigacija između funkcionalnosti bez potrebe za dodatnim objašnjenjima.
+
+Automatizirano prepoznavanje lica:
+
+Trenutno prepoznavanje lica za automatsko bilježenje prisutnosti u stvarnom vremenu.
+
+Visoka preciznost i brzina prepoznavanja, čak i u gužvama ili s različitim kutovima gledanja kamere.
+
+Analitika i izvještaji u stvarnom vremenu:
+
+Detaljna statistika o prisutnosti, kašnjenju, učestalosti dolazaka i drugim relevantnim metrikama.
+
+Automatski generirani izvještaji spremni za pregled i daljnju analizu.
+
+Brzo dodavanje novih korisnika:
+
+Novi korisnici mogu biti dodani u sustav u svega nekoliko sekundi, što omogućava brzu implementaciju.
+
+Jednostavno dodavanje korisničkih profila s potrebnim podacima i slikama za prepoznavanje.
+
+Kompatibilnost s uređajima:
+
+Kompatibilan s računalima i mobilnim uređajima, omogućujući upotrebu u različitim okruženjima.
+
+Laka integracija u postojeće sustave bez potrebe za dodatnim hardverskim ulaganjima.
+
+Sigurnost podataka:
+
+Zaštita podataka temelji se na naprednim sigurnosnim standardima, uz poštivanje privatnosti korisnika.
+
+Lica nisu pohranjena, čime je osigurana privatnost i sigurnost korisničkih podataka.
+
+Mobilna verzija:
+
+Dostupna mobilna aplikacija za praćenje prisutnosti u realnom vremenu s jednostavnom integracijom kamere.
+
+Funkcionalnosti mobilne verzije uključuju obavijesti, pregled statistika i promjenu postavki.
+
+Vizualizacija podataka:
+
+Grafički prikazi statistike i trendova prisutnosti u obliku dijagrama i grafova za lakše razumijevanje.
+
+Mogućnost izvoza podataka u formate poput CSV za daljnju analizu.
+
+Prilagodljive postavke:
+
+Sučelje i funkcionalnosti mogu se prilagoditi specifičnim potrebama korisnika, uključujući veličinu baze i vrste izvještaja.
+
+Integracija s drugim sustavima:
+
+Mogućnost integracije s postojećim sustavima za evidenciju, sigurnost ili upravljanje zaposlenicima i događanjima.
 # COMPUTER VISION ATTENDANCE MODULE (name still not definitive)  
 Faculty of Informatics in Pula: [https://fipu.unipu.hr/](https://fipu.unipu.hr/)  
 
