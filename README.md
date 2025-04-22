@@ -1,3 +1,35 @@
+PREDNOSTI:
+Evo nekoliko ključnih natuknica koje pokazuju zašto je *FaceMark* bolje od klasičnih načina bilježenja prisutnosti poput potpisa, QR kodova i sličnih metoda:
+
+1. **Brzina i Efikasnost:**
+   - Prepoznavanje lica omogućuje automatsko bilježenje prisutnosti u stvarnom vremenu, što eliminira potrebe za ručnim unosima ili skeniranjem QR kodova.
+   - **Brzo prepoznavanje** – sustav identifikira korisnike gotovo odmah, bez čekanja na skeniranje ili čekanje na potpis.
+
+2. **Bez Grešaka i Manipulacija:**
+   - Nema prostora za pogreške poput pogrešnog potpisa ili skeniranja pogrešnog QR koda.
+   - Tehnologija prepoznavanja lica eliminira rizik od **lažiranja prisutnosti** (npr. netko se potpiše ili koristi tuđi QR kod).
+
+3. **Automatska Analiza i Izvještaji:**
+   - Uz *FaceMark*, ne morate ručno bilježiti ili pratiti prisutnost. Sustav automatski prikuplja i analizira podatke, pružajući vam statističke uvide o prisutnosti.
+   - **Detaljna analiza** može obuhvatiti obrasce dolazaka, kašnjenja i druge relevantne informacije bez potrebe za dodatnim unosima.
+
+4. **Ušteda vremena i resursa:**
+   - Nema potrebe za fizičkim upisivanjem, skeniranjem ili razmjenom papira, što štedi dragocjeno vrijeme i smanjuje potrebu za zaposlenicima koji se bave administrativnim zadacima.
+   - **Brža implementacija** – dodavanje novih korisnika u sustav je gotovo instant, u usporedbi s ručnim unosima ili ručnim ažuriranjem QR kodova.
+
+5. **Veća Sigurnost:**
+   - Prepoznavanje lica omogućuje visoku razinu sigurnosti jer je teško manipulisati ili lažirati identitet putem tehnologije prepoznavanja.
+   - **Nema zaboravljenih lozinki** ili problema s lažnim prijavama koje su česte kod sustava temeljenih na QR kodovima ili potpisima.
+
+6. **Lakoća u Skaliranju:**
+   - Korištenje tehnologije prepoznavanja lica olakšava primjenu u velikim okruženjima (škole, tvrtke, događanja) bez potrebe za dodatnim resursima za održavanje ručnih evidencija ili fizičkih sustava (kao što su papiri i QR kodovi).
+
+7. **Kompatibilnost i Prilagodljivost:**
+   - Sustav je kompatibilan sa svim računalima i mobilnim uređajima, što znači da se može brzo implementirati u bilo kojem okruženju.
+   - **Fleksibilnost** omogućava integraciju s postojećim sustavima bez potrebe za kompleksnim ažuriranjima infrastrukture.
+
+Ove prednosti jasno pokazuju da *FaceMark* nudi brže, sigurnije, učinkovitije i skalabilnije rješenje za praćenje prisutnosti u usporedbi s tradicionalnim metodama.
+
 # COMPUTER VISION ATTENDANCE MODULE (name still not definitive)  
 Faculty of Informatics in Pula: [https://fipu.unipu.hr/](https://fipu.unipu.hr/)  
 
