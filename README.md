@@ -1,3 +1,18 @@
+Monetizacija:
+​
+
+Licenciranje softvera: Prodaja licenci tvrtkama, školama, organizatorima događanja za korištenje sustava.​
+
+Pretplate: Mjesečne ili godišnje pretplate za pristup naprednim funkcijama i analitici.​
+
+Freemium model: Besplatan osnovni paket s opcijama za nadogradnju na premium funkcionalnosti.​
+
+Personalizirane usluge: Ponuda prilagodbe sustava prema specifičnim potrebama korisnika (npr. integracija s postojećim sustavima).​
+
+Brendirani paketi: Ponuda specijaliziranih paketa za događanja ili korporacije s personaliziranim rješenjima.​
+
+Oglašavanje unutar aplikacije: Dodavanje oglasa ili partnerskih promocija u mobilnoj aplikaciji ili web sučelju.​
+
 PREDNOSTI:
 Evo nekoliko ključnih natuknica koje pokazuju zašto je *FaceMark* bolje od klasičnih načina bilježenja prisutnosti poput potpisa, QR kodova i sličnih metoda:
 
