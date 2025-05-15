@@ -11,11 +11,11 @@ body {
 /* Header */
 h1 {
     font-size: 3em;
-    color: #f39c12; /* Gold accent */
+    color: #12bbf3; /* Gold accent */
     text-transform: uppercase;
     letter-spacing: 0.1em;
     margin-bottom: 20px;
-    text-shadow: 3px 3px 0 #000, 6px 6px 0 #f39c12;
+    text-shadow: 3px 3px 0 #000, 6px 6px 0 #12bbf3;;
 }
 
 /* Forms */
@@ -25,7 +25,7 @@ form {
     margin: 0 auto;
     width: 300px;
     border-radius: 10px;
-    box-shadow: 0px 0px 20px #f39c12; /* Gold shadow */
+    box-shadow: 0px 0px 20px #12bbf3;; /* Gold shadow */
 }
 
 input[type="text"],
@@ -35,7 +35,7 @@ input[type="password"] {
     padding: 10px;
     margin: 10px 0;
     border: none;
-    border-bottom: 3px solid #f39c12; /* Gold accent */
+    border-bottom: 3px solid #12bbf3;; /* Gold accent */
     background-color: #222;
     color: #e0e0e0;
     font-size: 1em;
@@ -44,13 +44,13 @@ input[type="password"] {
 input[type="text"]:focus,
 input[type="email"]:focus,
 input[type="password"]:focus {
-    border-bottom: 3px solid #e67e22; /* Orange accent */
+    border-bottom: 3px solid #12bbf3;; /* Orange accent */
     outline: none;
 }
 
 /* Buttons */
 button[type="submit"] {
-    background-color: #f39c12; /* Gold button */
+    background-color:#12bbf3;; /* Gold button */
     color: #222; /* Dark text */
     padding: 10px 20px;
     font-size: 1.2em;
@@ -61,18 +61,18 @@ button[type="submit"] {
 }
 
 button[type="submit"]:hover {
-    background-color: #e67e22; /* Darker orange */
+    background-color: #0997c6;; /* Darker orange */
 }
 
 /* Links */
 a {
-    color: #f39c12; /* Gold links */
+    color: #12bbf3;; /* Gold links */
     text-decoration: none;
     transition: color 0.3s ease;
 }
 
 a:hover {
-    color: #e67e22; /* Darker orange */
+    color: #0997c6; /* Darker orange */
     text-shadow: 0px 0px 5px #f39c12;
 }
 
@@ -81,11 +81,11 @@ ul li {
     list-style-type: none;
     padding: 10px;
     background-color: #444; /* Dark background for messages */
-    color: #f39c12; /* Gold text */
+    color: #12bbf3;; /* Gold text */
     border-radius: 5px;
     margin: 10px auto;
     width: 60%;
-    box-shadow: 0px 0px 10px #e67e22; /* Orange shadow */
+    box-shadow: 0px 0px 10px #12bbf3;; /* Orange shadow */
     animation: flashAnimation 1s ease-in-out;
 }
 
@@ -99,7 +99,7 @@ ul li {
 footer {
     margin-top: 20px;
     font-size: 0.9em;
-    color: #f39c12; /* Gold footer text */
+    color: #12bbf3;; /* Gold footer text */
 }
 
 /* Navigation Styling */
@@ -121,7 +121,7 @@ nav ul li {
 nav ul li a {
     display: inline-block;
     padding: 8px 12px;
-    background-color: #f39c12; /* Gold background */
+    background-color: #12bbf3;; /* Gold background */
     color: #222; /* Dark text color */
     border-radius: 5px;
     transition: background-color 0.3s ease, transform 0.3s ease;
@@ -132,6 +132,6 @@ nav ul li a {
 }
 
 nav ul li a:hover {
-    background-color: #e67e22; /* Darker orange on hover */
+    background-color: #12bbf3;; /* Darker orange on hover */
     transform: scale(1.05); /* Slightly enlarge the button on hover */
 }
