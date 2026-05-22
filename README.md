@@ -1,4 +1,4 @@
-# COMPUTER VISION ATTENDANCE MODULE (name still not definitive)  
+# COMPUTER VISION ATTENDANCE MODULE 
 Faculty of Informatics in Pula: [https://fipu.unipu.hr/](https://fipu.unipu.hr/)  
 
 **Author:** Antonio Labinjan  
